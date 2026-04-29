@@ -1,0 +1,15 @@
+{
+  "name": "studychaser-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend API for the StudyChaser clinical training tracker.",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
