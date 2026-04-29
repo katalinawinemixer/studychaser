@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { studies, trainings, people } from '../data/mockData'
+import { useEffect, useState } from 'react'
+import { apiGet, apiPost, useApiData } from '../lib/api'
 
 const EMAIL_TYPES = [
   { value: 'first',    label: 'First Reminder' },
@@ -9,85 +9,28 @@ const EMAIL_TYPES = [
   { value: 'pi',       label: 'PI Escalation' },
 ]
 
-function generateEmail({ study, training, person, type, senderName }) {
-  if (!study || !training || !person) return null
-
-  const sig = `Best regards,\n${senderName}\nRegulatory Coordinator`
-
-  const subjects = {
-    first:   `[${study.studyNumber}] ${training.title} — Training Follow-Up`,
-    second:  `[${study.studyNumber}] ${training.title} — Second Follow-Up Reminder`,
-    overdue: `[${study.studyNumber}] ${training.title} — Overdue Acknowledgment Required`,
-    confirm: `[${study.studyNumber}] ${training.title} — Acknowledgment Received`,
-    pi:      `[${study.studyNumber}] ${training.title} — Escalation: Pending Training Acknowledgment`,
-  }
-
-  const bodies = {
-    first: `Hi ${person.name.split(' ')[0]},
-
-I hope you're doing well. I'm following up on the ${training.title} (${training.version}) for Study ${study.studyNumber} — ${study.title}.
-
-Training documentation was distributed on ${training.sentDate}. Per protocol requirements, we ask that all study staff acknowledge receipt and completion of this training.
-
-If you have already completed this training, please reply to this email to confirm so we may update our records.
-
-Thank you for your time and continued involvement in this study.
-
-${sig}`,
-
-    second: `Hi ${person.name.split(' ')[0]},
-
-This is a second follow-up regarding the ${training.title} (${training.version}) for Study ${study.studyNumber}.
-
-Our records indicate we have not yet received your acknowledgment. This training acknowledgment is required for regulatory compliance and must be documented in the study binder.
-
-Please respond at your earliest convenience, or let me know if you have any questions about the training materials.
-
-${sig}`,
-
-    overdue: `Hi ${person.name.split(' ')[0]},
-
-I'm reaching out again regarding the outstanding ${training.title} (${training.version}) acknowledgment for Study ${study.studyNumber}.
-
-This acknowledgment is now overdue. Per our site SOPs, all protocol training must be documented prior to participation in study-related activities.
-
-Please respond to this email with your acknowledgment as soon as possible. If there is an issue preventing completion, please let me know so we can address it promptly.
-
-${sig}`,
-
-    confirm: `Hi ${person.name.split(' ')[0]},
-
-Thank you — we have received your acknowledgment for the ${training.title} (${training.version}) for Study ${study.studyNumber}.
-
-Your training record has been updated and documentation will be filed in the study binder under:
-${study.studyNumber} > Training > ${training.title}
-
-No further action is needed on your end. Thank you for your prompt response.
-
-${sig}`,
-
-    pi: `Hi Dr. ${study.pi.split(' ').slice(-1)[0]},
-
-I'm writing to bring to your attention that ${person.name} has not yet acknowledged the ${training.title} (${training.version}) for Study ${study.studyNumber} — ${study.title}.
-
-Training was distributed on ${training.sentDate}, and multiple follow-up reminders have been sent without response. Per our site SOPs and regulatory requirements, this training must be documented before study activities can continue.
-
-Could you please assist in facilitating acknowledgment at your earliest convenience?
-
-Thank you for your support.
-
-${sig}`,
-  }
-
-  return { subject: subjects[type], body: bodies[type] }
-}
-
 export default function EmailGenerator() {
   const [studyId,    setStudyId]    = useState('')
   const [trainingId, setTrainingId] = useState('')
   const [personId,   setPersonId]   = useState('')
   const [emailType,  setEmailType]  = useState('first')
   const [copied,     setCopied]     = useState(false)
+  const [email,      setEmail]      = useState(null)
+  const [emailError, setEmailError] = useState('')
+  const [emailLoading, setEmailLoading] = useState(false)
+
+  const { data, loading, error } = useApiData(
+    async () => {
+      const [studies, trainings, people] = await Promise.all([
+        apiGet('/studies'),
+        apiGet('/trainings'),
+        apiGet('/people'),
+      ])
+      return { studies, trainings, people }
+    },
+    { studies: [], trainings: [], people: [] }
+  )
+  const { studies, trainings, people } = data
 
   const study    = studies.find(s => s.id === Number(studyId))
   const training = trainings.find(t => t.id === Number(trainingId))
@@ -101,9 +44,42 @@ export default function EmailGenerator() {
     ? (trainings.find(t => t.id === Number(trainingId))?.staff ?? [])
     : []
 
-  const email = generateEmail({
-    study, training, person, type: emailType, senderName: 'Katalina M.',
-  })
+  useEffect(() => {
+    if (!studyId || !trainingId || !personId) {
+      setEmail(null)
+      setEmailError('')
+      setEmailLoading(false)
+      return
+    }
+
+    let active = true
+    setEmailLoading(true)
+    setEmailError('')
+
+    apiPost('/email/generate', {
+      studyId: Number(studyId),
+      trainingId: Number(trainingId),
+      personId: Number(personId),
+      type: emailType,
+      senderName: 'Katalina M.',
+    })
+      .then(result => {
+        if (active) setEmail(result)
+      })
+      .catch(err => {
+        if (active) {
+          setEmail(null)
+          setEmailError(err.message || 'Unable to generate email')
+        }
+      })
+      .finally(() => {
+        if (active) setEmailLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [studyId, trainingId, personId, emailType])
 
   const handleCopy = () => {
     if (!email) return
@@ -118,9 +94,13 @@ export default function EmailGenerator() {
       <div className="page-header">
         <h1 className="page-title">Email Generator</h1>
         <p className="page-subtitle">
-          Generate a ready-to-send follow-up email. Copy it directly into Outlook.
+          Generate a ready-to-send follow-up email from the backend. Copy it directly into Outlook.
         </p>
       </div>
+
+      {error && <div className="api-message api-error">{error}</div>}
+      {loading && <div className="api-message">Loading email options...</div>}
+      {emailError && <div className="api-message api-error">{emailError}</div>}
 
       <div className="email-layout">
         {/* Form panel */}
@@ -135,6 +115,7 @@ export default function EmailGenerator() {
                 className="form-select"
                 value={studyId}
                 onChange={e => { setStudyId(e.target.value); setTrainingId(''); setPersonId('') }}
+                disabled={loading}
               >
                 <option value="">Select a study…</option>
                 {studies.map(s => (
@@ -149,7 +130,7 @@ export default function EmailGenerator() {
                 className="form-select"
                 value={trainingId}
                 onChange={e => { setTrainingId(e.target.value); setPersonId('') }}
-                disabled={!studyId}
+                disabled={!studyId || loading}
               >
                 <option value="">Select a training…</option>
                 {studyTrainings.map(t => (
@@ -164,7 +145,7 @@ export default function EmailGenerator() {
                 className="form-select"
                 value={personId}
                 onChange={e => setPersonId(e.target.value)}
-                disabled={!trainingId}
+                disabled={!trainingId || loading}
               >
                 <option value="">Select a person…</option>
                 {trainingPeople.map(m => {
@@ -184,6 +165,7 @@ export default function EmailGenerator() {
                 className="form-select"
                 value={emailType}
                 onChange={e => setEmailType(e.target.value)}
+                disabled={loading}
               >
                 {EMAIL_TYPES.map(t => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -195,10 +177,10 @@ export default function EmailGenerator() {
               className="btn btn-primary"
               style={{ marginTop: '4px', justifyContent: 'center' }}
               onClick={handleCopy}
-              disabled={!email}
+              disabled={!email || emailLoading}
             >
               <CopyIcon />
-              {copied ? 'Copied!' : 'Copy to Clipboard'}
+              {emailLoading ? 'Generating...' : copied ? 'Copied!' : 'Copy to Clipboard'}
             </button>
           </div>
         </div>
@@ -214,7 +196,13 @@ export default function EmailGenerator() {
             )}
           </div>
 
-          {email ? (
+          {emailLoading ? (
+            <div className="empty-state" style={{ padding: '80px 20px' }}>
+              <MailIcon />
+              <h3 style={{ marginTop: '14px' }}>Generating email...</h3>
+              <p>The backend is preparing the selected follow-up template.</p>
+            </div>
+          ) : email ? (
             <>
               <div className="email-meta">
                 <div className="email-meta-row">

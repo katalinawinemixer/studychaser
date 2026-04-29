@@ -1,10 +1,18 @@
 import { useState } from 'react'
-import { trainings, studies } from '../data/mockData'
 import StatusBadge from '../components/StatusBadge'
+import { apiGet, useApiData } from '../lib/api'
 
 export default function Training() {
   const [selectedStudyId, setSelectedStudyId] = useState('all')
   const [openIds, setOpenIds] = useState([1, 3])
+  const { data, loading, error } = useApiData(
+    async () => {
+      const [trainings, studies] = await Promise.all([apiGet('/trainings'), apiGet('/studies')])
+      return { trainings, studies }
+    },
+    { trainings: [], studies: [] }
+  )
+  const { trainings, studies } = data
 
   const filtered = selectedStudyId === 'all'
     ? trainings
@@ -29,6 +37,9 @@ export default function Training() {
           </button>
         </div>
       </div>
+
+      {error && <div className="api-message api-error">{error}</div>}
+      {loading && <div className="api-message">Loading trainings...</div>}
 
       <div className="training-filter">
         <label>Filter by study:</label>
@@ -65,7 +76,7 @@ export default function Training() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span className="training-block-title">{training.title}</span>
-                  <span className="tag">{study.studyNumber}</span>
+                  <span className="tag">{study?.studyNumber ?? 'Unknown study'}</span>
                   {hasUrgent && (
                     <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 600 }}>
                       ⚠ Needs attention

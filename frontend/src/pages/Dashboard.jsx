@@ -1,42 +1,18 @@
-import { trainings, studies } from '../data/mockData'
 import StatusBadge from '../components/StatusBadge'
-
-const attentionItems = []
-trainings.forEach(t => {
-  const study = studies.find(s => s.id === t.studyId)
-  t.staff.forEach(member => {
-    if (
-      member.status === 'overdue' ||
-      (member.status === 'reminded' && member.daysAgo >= t.cadenceDays) ||
-      (member.status === 'sent'    && member.daysAgo >= t.cadenceDays)
-    ) {
-      attentionItems.push({
-        person:     member.name,
-        training:   t.title,
-        study:      study.studyNumber,
-        status:     member.status,
-        daysAgo:    member.daysAgo,
-        nextAction: member.status === 'overdue' ? 'Escalate to PI' : 'Send reminder',
-      })
-    }
-  })
-})
-attentionItems.sort((a, b) => {
-  const order = { overdue: 0, reminded: 1, sent: 2 }
-  return (order[a.status] ?? 3) - (order[b.status] ?? 3)
-})
-
-const allStaff         = trainings.flatMap(t => t.staff)
-const overdueCount     = allStaff.filter(s => s.status === 'overdue').length
-const awaitingCount    = allStaff.filter(s => ['sent', 'reminded'].includes(s.status)).length
-const completedCount   = allStaff.filter(s => s.status === 'complete').length
-const activeStudies    = studies.filter(s => s.status === 'active').length
+import { apiGet, useApiData } from '../lib/api'
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
 })
 
 export default function Dashboard() {
+  const { data, loading, error } = useApiData(
+    () => apiGet('/dashboard/summary'),
+    { stats: {}, attentionItems: [], studySummary: [] }
+  )
+  const { overdueCount = 0, awaitingCount = 0, completedCount = 0, activeStudies = 0 } = data.stats
+  const { attentionItems, studySummary } = data
+
   return (
     <div>
       {/* Header */}
@@ -51,6 +27,9 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {error && <div className="api-message api-error">{error}</div>}
+      {loading && <div className="api-message">Loading dashboard data...</div>}
 
       {/* Stat cards */}
       <div className="stats-grid">
@@ -146,7 +125,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {studies.map(s => (
+              {studySummary.map(s => (
                 <tr key={s.id}>
                   <td><span className="tag">{s.studyNumber}</span></td>
                   <td className="td-name">{s.title}</td>

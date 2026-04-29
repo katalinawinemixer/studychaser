@@ -173,6 +173,22 @@ body {
   margin-top: 4px;
 }
 
+.api-message {
+  background: var(--accent-light);
+  border: 1px solid rgba(74, 158, 138, 0.22);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  margin: 0 0 18px;
+  padding: 10px 12px;
+}
+
+.api-error {
+  background: var(--overdue-bg);
+  border-color: rgba(239, 68, 68, 0.24);
+  color: #9F1239;
+}
+
 /* ── Cards ───────────────────────────────────────────────── */
 .card {
   background: var(--bg-card);

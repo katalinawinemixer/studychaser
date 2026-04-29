@@ -1,10 +1,18 @@
-import { people, studies } from '../data/mockData'
+import { apiGet, useApiData } from '../lib/api'
 
 function initials(name) {
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 }
 
 export default function People() {
+  const { data, loading, error } = useApiData(
+    async () => {
+      const [people, studies] = await Promise.all([apiGet('/people'), apiGet('/studies')])
+      return { people, studies }
+    },
+    { people: [], studies: [] }
+  )
+  const { people, studies } = data
   const missingAnyone = people.filter(p => p.missingTrainings > 0)
 
   return (
@@ -27,6 +35,9 @@ export default function People() {
           </button>
         </div>
       </div>
+
+      {error && <div className="api-message api-error">{error}</div>}
+      {loading && <div className="api-message">Loading people...</div>}
 
       <div className="people-grid">
         {people.map(person => {

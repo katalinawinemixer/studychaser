@@ -8,9 +8,11 @@ const store = createStore()
 const PORT = Number(process.env.PORT ?? 4000)
 const HOST = process.env.HOST ?? '127.0.0.1'
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173'
+const LOCAL_DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/
 
 const server = createServer(async (req, res) => {
   try {
+    res.req = req
     await route(req, res)
   } catch (error) {
     sendJson(res, error.statusCode ?? 500, {
@@ -178,7 +180,7 @@ async function readJson(req) {
 function sendJson(res, statusCode, payload) {
   const body = JSON.stringify(payload)
   res.writeHead(statusCode, {
-    ...corsHeaders(),
+    ...corsHeaders(res.req),
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(body),
   })
@@ -186,13 +188,17 @@ function sendJson(res, statusCode, payload) {
 }
 
 function sendEmpty(res, statusCode) {
-  res.writeHead(statusCode, corsHeaders())
+  res.writeHead(statusCode, corsHeaders(res.req))
   res.end()
 }
 
-function corsHeaders() {
+function corsHeaders(req) {
+  const origin = req?.headers.origin
+  const allowedOrigin = origin && LOCAL_DEV_ORIGIN.test(origin) ? origin : FRONTEND_ORIGIN
+
   return {
-    'Access-Control-Allow-Origin': FRONTEND_ORIGIN,
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Vary': 'Origin',
     'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   }

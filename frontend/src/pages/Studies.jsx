@@ -1,6 +1,8 @@
-import { studies } from '../data/mockData'
+import { apiGet, useApiData } from '../lib/api'
 
 export default function Studies() {
+  const { data: studies, loading, error } = useApiData(() => apiGet('/studies'), [])
+
   return (
     <div>
       <div className="page-header">
@@ -14,6 +16,9 @@ export default function Studies() {
           </button>
         </div>
       </div>
+
+      {error && <div className="api-message api-error">{error}</div>}
+      {loading && <div className="api-message">Loading studies...</div>}
 
       <div className="studies-grid">
         {studies.map(study => (
