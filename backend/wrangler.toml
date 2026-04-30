@@ -3,7 +3,7 @@ main = "src/worker.js"
 compatibility_date = "2026-04-29"
 
 [vars]
-FRONTEND_ORIGIN = "https://studychaser.katalinalondono.com"
+FRONTEND_ORIGINS = "https://studychaser.katalinalondono.com,https://www.studychaser.katalinalondono.com"
 
 [[kv_namespaces]]
 binding = "STUDYCHASER_KV"

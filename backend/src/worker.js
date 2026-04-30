@@ -212,8 +212,13 @@ function json(request, env, status, payload) {
 
 function corsHeaders(request, env) {
   const origin = request.headers.get('Origin')
-  const frontendOrigin = env.FRONTEND_ORIGIN ?? 'https://studychaser.katalinalondono.com'
-  const allowedOrigin = origin && LOCAL_DEV_ORIGIN.test(origin) ? origin : frontendOrigin
+  const frontendOrigins = (env.FRONTEND_ORIGINS ?? env.FRONTEND_ORIGIN ?? 'https://studychaser.katalinalondono.com,https://www.studychaser.katalinalondono.com')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+  const allowedOrigin = origin && (LOCAL_DEV_ORIGIN.test(origin) || frontendOrigins.includes(origin))
+    ? origin
+    : frontendOrigins[0]
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,

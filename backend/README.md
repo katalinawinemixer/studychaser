@@ -40,6 +40,8 @@ npm run dev:worker
 
 The Worker uses the `STUDYCHASER_KV` binding configured in `wrangler.toml`. On first request, it seeds KV from `data/db.json`.
 
+The `FRONTEND_ORIGINS` value controls which browser origins may call the API. It includes both `studychaser.katalinalondono.com` and `www.studychaser.katalinalondono.com`.
+
 For live reload while developing:
 
 ```bash
