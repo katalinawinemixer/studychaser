@@ -1,0 +1,10 @@
+name = "studychaser-api"
+main = "src/worker.js"
+compatibility_date = "2026-04-29"
+
+[vars]
+FRONTEND_ORIGIN = "https://studychaser.katalinalondono.com"
+
+[[kv_namespaces]]
+binding = "STUDYCHASER_KV"
+id = "b23be0540649488e9f8f6a76511ad375"

@@ -16,6 +16,30 @@ The API starts at:
 http://127.0.0.1:4000
 ```
 
+## Cloudflare Workers
+
+The backend can also run on Cloudflare Workers with Workers KV as its data store.
+
+The deployed Worker is:
+
+```text
+https://studychaser-api.katalinalondono.workers.dev
+```
+
+Deploy it with:
+
+```bash
+npm run deploy
+```
+
+Run it locally with the Worker runtime:
+
+```bash
+npm run dev:worker
+```
+
+The Worker uses the `STUDYCHASER_KV` binding configured in `wrangler.toml`. On first request, it seeds KV from `data/db.json`.
+
 For live reload while developing:
 
 ```bash

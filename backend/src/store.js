@@ -1,5 +1,6 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
+export { nextId, sanitizePerson, sanitizeStudy, sanitizeTraining } from './model.js'
 
 const DEFAULT_DATA_FILE = './data/db.json'
 
@@ -24,37 +25,4 @@ export function createStore(dataFile = process.env.DATA_FILE ?? DEFAULT_DATA_FIL
   }
 
   return { read, write, filePath }
-}
-
-export function nextId(items) {
-  return items.reduce((max, item) => Math.max(max, Number(item.id) || 0), 0) + 1
-}
-
-export function sanitizeStudy(payload) {
-  return pick(payload, [
-    'studyNumber',
-    'title',
-    'pi',
-    'coordinator',
-    'sponsor',
-    'irb',
-    'status',
-    'activeTrainings',
-    'completedTrainings',
-  ])
-}
-
-export function sanitizePerson(payload) {
-  return pick(payload, ['name', 'email', 'role', 'studyIds', 'missingTrainings', 'completedTrainings'])
-}
-
-export function sanitizeTraining(payload) {
-  return pick(payload, ['studyId', 'title', 'version', 'sentDate', 'cadenceDays', 'staff'])
-}
-
-function pick(source, keys) {
-  return keys.reduce((out, key) => {
-    if (Object.hasOwn(source, key)) out[key] = source[key]
-    return out
-  }, {})
 }

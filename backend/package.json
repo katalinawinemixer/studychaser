@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
+    "dev:worker": "npx --yes wrangler dev",
+    "deploy": "npx --yes wrangler deploy",
     "start": "node src/server.js",
     "test": "node --test"
   },
