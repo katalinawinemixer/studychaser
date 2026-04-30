@@ -1,7 +1,35 @@
-import { apiGet, useApiData } from '../lib/api'
+import { useState } from 'react'
+import { apiGet, apiPost, useApiData } from '../lib/api'
+import Modal from '../components/Modal'
+
+const EMPTY_FORM = { studyNumber: '', title: '', pi: '', coordinator: '', sponsor: '', irb: '' }
 
 export default function Studies() {
-  const { data: studies, loading, error } = useApiData(() => apiGet('/studies'), [])
+  const { data: studies, loading, error, refetch } = useApiData(() => apiGet('/studies'), [])
+  const [addOpen, setAddOpen] = useState(false)
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  const set = key => e => setForm(prev => ({ ...prev, [key]: e.target.value }))
+
+  function openModal() { setSubmitError(''); setForm(EMPTY_FORM); setAddOpen(true) }
+  function closeModal() { setAddOpen(false); setSubmitError('') }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      await apiPost('/studies', form)
+      refetch()
+      closeModal()
+    } catch (err) {
+      setSubmitError(err.message || 'Failed to add study')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div>
@@ -11,7 +39,7 @@ export default function Studies() {
             <h1 className="page-title">Studies</h1>
             <p className="page-subtitle">{studies.length} active studies with open training requirements.</p>
           </div>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={openModal}>
             <PlusIcon /> Add Study
           </button>
         </div>
@@ -66,10 +94,84 @@ export default function Studies() {
           </div>
         ))}
       </div>
+
+      {addOpen && (
+        <Modal title="Add Study" onClose={closeModal}>
+          <form onSubmit={handleSubmit} className="form-stack">
+            <div className="form-group">
+              <label className="form-label">Study Number <Req /></label>
+              <input
+                className="form-input"
+                value={form.studyNumber}
+                onChange={set('studyNumber')}
+                placeholder="e.g. ABC-2024-001"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Title <Req /></label>
+              <input
+                className="form-input"
+                value={form.title}
+                onChange={set('title')}
+                placeholder="Study title"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Principal Investigator <Req /></label>
+              <input
+                className="form-input"
+                value={form.pi}
+                onChange={set('pi')}
+                placeholder="Dr. First Last"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Coordinator</label>
+              <input
+                className="form-input"
+                value={form.coordinator}
+                onChange={set('coordinator')}
+                placeholder="Coordinator name"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Sponsor</label>
+              <input
+                className="form-input"
+                value={form.sponsor}
+                onChange={set('sponsor')}
+                placeholder="Sponsor name"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">IRB</label>
+              <input
+                className="form-input"
+                value={form.irb}
+                onChange={set('irb')}
+                placeholder="e.g. WCG IRB"
+              />
+            </div>
+
+            {submitError && <div className="api-message api-error">{submitError}</div>}
+
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={closeModal}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? 'Adding…' : 'Add Study'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   )
 }
 
+const Req        = () => <span style={{ color: '#EF4444' }}>*</span>
 const PlusIcon   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 const PersonIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 const CoordIcon  = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>

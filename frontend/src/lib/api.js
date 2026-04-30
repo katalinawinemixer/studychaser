@@ -16,10 +16,19 @@ export async function apiPost(path, body) {
   })
 }
 
+export async function apiPatch(path, body) {
+  return apiRequest(path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
 export function useApiData(loader, initialData) {
   const [data, setData] = useState(initialData)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -42,9 +51,11 @@ export function useApiData(loader, initialData) {
     return () => {
       active = false
     }
-  }, [])
+  }, [reloadKey])
 
-  return { data, loading, error }
+  const refetch = () => setReloadKey(k => k + 1)
+
+  return { data, loading, error, refetch }
 }
 
 async function apiRequest(path, options) {

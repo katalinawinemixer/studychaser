@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { apiGet, apiPost, useApiData } from '../lib/api'
 
 const EMAIL_TYPES = [
@@ -10,10 +11,11 @@ const EMAIL_TYPES = [
 ]
 
 export default function EmailGenerator() {
-  const [studyId,    setStudyId]    = useState('')
-  const [trainingId, setTrainingId] = useState('')
-  const [personId,   setPersonId]   = useState('')
-  const [emailType,  setEmailType]  = useState('first')
+  const [searchParams] = useSearchParams()
+  const [studyId,    setStudyId]    = useState(() => searchParams.get('studyId')    ?? '')
+  const [trainingId, setTrainingId] = useState(() => searchParams.get('trainingId') ?? '')
+  const [personId,   setPersonId]   = useState(() => searchParams.get('personId')   ?? '')
+  const [emailType,  setEmailType]  = useState(() => searchParams.get('type')       ?? 'first')
   const [copied,     setCopied]     = useState(false)
   const [email,      setEmail]      = useState(null)
   const [emailError, setEmailError] = useState('')

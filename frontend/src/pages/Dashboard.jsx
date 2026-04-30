@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import { apiGet, useApiData } from '../lib/api'
 
@@ -6,12 +7,18 @@ const today = new Date().toLocaleDateString('en-US', {
 })
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const { data, loading, error } = useApiData(
     () => apiGet('/dashboard/summary'),
     { stats: {}, attentionItems: [], studySummary: [] }
   )
   const { overdueCount = 0, awaitingCount = 0, completedCount = 0, activeStudies = 0 } = data.stats
   const { attentionItems, studySummary } = data
+
+  function handleActionPill(item) {
+    const type = item.status === 'overdue' ? 'pi' : 'second'
+    navigate(`/email?studyId=${item.studyId}&trainingId=${item.trainingId}&personId=${item.personId}&type=${type}`)
+  }
 
   return (
     <div>
@@ -22,7 +29,7 @@ export default function Dashboard() {
             <h1 className="page-title">Good morning, Katalina 👋</h1>
             <p className="page-subtitle">{today} — here's what needs your attention today.</p>
           </div>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => navigate('/training?new=1')}>
             <PlusIcon /> New Training
           </button>
         </div>
@@ -99,7 +106,9 @@ export default function Dashboard() {
                     {item.daysAgo} days
                   </td>
                   <td>
-                    <button className="action-pill">{item.nextAction}</button>
+                    <button className="action-pill" onClick={() => handleActionPill(item)}>
+                      {item.nextAction}
+                    </button>
                   </td>
                 </tr>
               ))}
