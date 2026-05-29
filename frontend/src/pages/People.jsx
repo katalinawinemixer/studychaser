@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { apiGet, apiPost, useApiData } from '../lib/api'
+import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
 
 function initials(name) {
@@ -68,9 +68,11 @@ export default function People() {
               )}
             </p>
           </div>
-          <button className="btn btn-primary" onClick={openModal}>
-            <PlusIcon /> Add Person
-          </button>
+          {!IS_READ_ONLY_DEMO && (
+            <button className="btn btn-primary" onClick={openModal}>
+              <PlusIcon /> Add Person
+            </button>
+          )}
         </div>
       </div>
 
@@ -138,7 +140,7 @@ export default function People() {
         })}
       </div>
 
-      {addOpen && (
+      {!IS_READ_ONLY_DEMO && addOpen && (
         <Modal title="Add Person" onClose={closeModal}>
           <form onSubmit={handleSubmit} className="form-stack">
             <div className="form-group">
@@ -158,7 +160,7 @@ export default function People() {
                 type="email"
                 value={form.email}
                 onChange={set('email')}
-                placeholder="name@institution.org"
+                  placeholder="name@example.org"
                 required
               />
             </div>

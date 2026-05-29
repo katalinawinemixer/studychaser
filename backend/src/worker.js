@@ -1,9 +1,10 @@
 import seedData from '../data/db.json'
 import { buildDashboard } from './dashboard.js'
+import { isBlockedDemoWrite, isReadOnlyDemo } from './demoMode.js'
 import { generateEmail } from './emailTemplates.js'
 import { nextId, pick, sanitizePerson, sanitizeStudy, sanitizeTraining } from './model.js'
 
-const DATA_KEY = 'studychaser:data'
+const DATA_KEY = 'studychaser:demo:v2'
 const LOCAL_DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/
 
 export default {
@@ -32,6 +33,12 @@ async function route(request, env) {
 
   if (request.method === 'GET' && segments[1] === 'health') {
     return json(request, env, 200, { ok: true, service: 'studychaser-backend-worker' })
+  }
+
+  if (isReadOnlyDemo(env) && isBlockedDemoWrite(request, segments)) {
+    return json(request, env, 405, {
+      error: 'This public portfolio demo is read-only. Run the app locally to try write actions.',
+    })
   }
 
   const store = createWorkerStore(env)
@@ -219,11 +226,14 @@ function corsHeaders(request, env) {
   const allowedOrigin = origin && (LOCAL_DEV_ORIGIN.test(origin) || frontendOrigins.includes(origin))
     ? origin
     : frontendOrigins[0]
+  const allowedMethods = isReadOnlyDemo(env)
+    ? 'GET,POST,OPTIONS'
+    : 'GET,POST,PATCH,PUT,DELETE,OPTIONS'
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Vary': 'Origin',
-    'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Methods': allowedMethods,
     'Access-Control-Allow-Headers': 'Content-Type',
   }
 }

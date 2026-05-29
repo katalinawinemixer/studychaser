@@ -63,7 +63,7 @@ export default function EmailGenerator() {
       trainingId: Number(trainingId),
       personId: Number(personId),
       type: emailType,
-      senderName: 'Katalina M.',
+      senderName: 'Alex Demo',
     })
       .then(result => {
         if (active) setEmail(result)
@@ -96,7 +96,7 @@ export default function EmailGenerator() {
       <div className="page-header">
         <h1 className="page-title">Email Generator</h1>
         <p className="page-subtitle">
-          Generate a ready-to-send follow-up email from the backend. Copy it directly into Outlook.
+          Preview a synthetic follow-up email from the backend. Copy the sample text for review.
         </p>
       </div>
 

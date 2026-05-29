@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
-import { apiGet, apiPost, useApiData } from '../lib/api'
+import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
 
 const EMPTY_FORM = { studyId: '', title: '', version: '', sentDate: '', cadenceDays: 14 }
@@ -20,7 +20,7 @@ export default function Training() {
   )
   const { trainings, studies } = data
 
-  const [addOpen, setAddOpen] = useState(() => searchParams.get('new') === '1')
+  const [addOpen, setAddOpen] = useState(() => !IS_READ_ONLY_DEMO && searchParams.get('new') === '1')
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -72,9 +72,11 @@ export default function Training() {
             <h1 className="page-title">Training Tracker</h1>
             <p className="page-subtitle">Track acknowledgment status for each study training item.</p>
           </div>
-          <button className="btn btn-primary" onClick={openModal}>
-            <PlusIcon /> Add Training
-          </button>
+          {!IS_READ_ONLY_DEMO && (
+            <button className="btn btn-primary" onClick={openModal}>
+              <PlusIcon /> Add Training
+            </button>
+          )}
         </div>
       </div>
 
@@ -207,7 +209,7 @@ export default function Training() {
         )
       })}
 
-      {addOpen && (
+      {!IS_READ_ONLY_DEMO && addOpen && (
         <Modal title="Add Training" onClose={closeModal}>
           <form onSubmit={handleSubmit} className="form-stack">
             <div className="form-group">

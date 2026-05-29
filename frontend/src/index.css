@@ -190,6 +190,21 @@ body {
   color: #9F1239;
 }
 
+.demo-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: var(--radius-sm);
+  color: #7C2D12;
+  font-size: 13px;
+  margin-bottom: 22px;
+  padding: 10px 12px;
+}
+
+.demo-banner span { color: #9A3412; }
+
 /* ── Cards ───────────────────────────────────────────────── */
 .card {
   background: var(--bg-card);

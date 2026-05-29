@@ -2,36 +2,36 @@
   "studies": [
     {
       "id": 1,
-      "studyNumber": "ABC-2024-001",
-      "title": "Phase II Safety and Efficacy Study",
-      "pi": "Dr. Sarah Chen",
-      "coordinator": "Katalina M.",
-      "sponsor": "BioPharma Inc.",
-      "irb": "WCG IRB",
+      "studyNumber": "DEMO-ONC-001",
+      "title": "Synthetic Oncology Training Study",
+      "pi": "Dr. Riley Example",
+      "coordinator": "Alex Demo",
+      "sponsor": "Demo Sponsor Labs",
+      "irb": "Synthetic IRB",
       "status": "active",
       "activeTrainings": 3,
       "completedTrainings": 7
     },
     {
       "id": 2,
-      "studyNumber": "XYZ-2024-042",
-      "title": "Oncology Biomarker Assessment Trial",
-      "pi": "Dr. James Park",
-      "coordinator": "Katalina M.",
-      "sponsor": "OncoCure Ltd.",
-      "irb": "WCG IRB",
+      "studyNumber": "DEMO-ONC-002",
+      "title": "Synthetic Biomarker Follow-Up Study",
+      "pi": "Dr. Morgan Sample",
+      "coordinator": "Alex Demo",
+      "sponsor": "Example Therapeutics",
+      "irb": "Synthetic IRB",
       "status": "active",
       "activeTrainings": 1,
       "completedTrainings": 4
     },
     {
       "id": 3,
-      "studyNumber": "DEF-2023-015",
-      "title": "Cardiovascular Prevention Long-Term Study",
-      "pi": "Dr. Monica Rivera",
-      "coordinator": "Maria L.",
-      "sponsor": "CardioHealth Corp.",
-      "irb": "Advarra IRB",
+      "studyNumber": "DEMO-CARD-003",
+      "title": "Synthetic Prevention Registry Study",
+      "pi": "Dr. Casey Placeholder",
+      "coordinator": "Jamie Example",
+      "sponsor": "Sample Health Corp.",
+      "irb": "Synthetic IRB",
       "status": "active",
       "activeTrainings": 2,
       "completedTrainings": 12
@@ -40,8 +40,8 @@
   "people": [
     {
       "id": 1,
-      "name": "Peter Thompson",
-      "email": "p.thompson@medcenter.org",
+      "name": "Taylor Example",
+      "email": "taylor.example@example.org",
       "role": "Sub-Investigator",
       "studyIds": [1, 2],
       "missingTrainings": 2,
@@ -49,8 +49,8 @@
     },
     {
       "id": 2,
-      "name": "Jane Williams",
-      "email": "j.williams@medcenter.org",
+      "name": "Jordan Sample",
+      "email": "jordan.sample@example.org",
       "role": "Research Nurse",
       "studyIds": [1],
       "missingTrainings": 0,
@@ -58,8 +58,8 @@
     },
     {
       "id": 3,
-      "name": "Maria Santos",
-      "email": "m.santos@medcenter.org",
+      "name": "Avery Demo",
+      "email": "avery.demo@example.org",
       "role": "Regulatory Coordinator",
       "studyIds": [1, 3],
       "missingTrainings": 1,
@@ -67,8 +67,8 @@
     },
     {
       "id": 4,
-      "name": "Dr. Sarah Chen",
-      "email": "s.chen@medcenter.org",
+      "name": "Dr. Riley Example",
+      "email": "riley.example@example.org",
       "role": "Principal Investigator",
       "studyIds": [1],
       "missingTrainings": 0,
@@ -76,8 +76,8 @@
     },
     {
       "id": 5,
-      "name": "Dr. James Park",
-      "email": "j.park@medcenter.org",
+      "name": "Dr. Morgan Sample",
+      "email": "morgan.sample@example.org",
       "role": "Principal Investigator",
       "studyIds": [2],
       "missingTrainings": 1,
@@ -85,8 +85,8 @@
     },
     {
       "id": 6,
-      "name": "Robert Kim",
-      "email": "r.kim@medcenter.org",
+      "name": "Robin Placeholder",
+      "email": "robin.placeholder@example.org",
       "role": "Clinical Research Coordinator",
       "studyIds": [2, 3],
       "missingTrainings": 0,
@@ -102,10 +102,10 @@
       "sentDate": "Dec 1, 2025",
       "cadenceDays": 14,
       "staff": [
-        { "personId": 1, "name": "Peter Thompson", "status": "reminded", "lastContacted": "Dec 15, 2025", "daysAgo": 14 },
-        { "personId": 2, "name": "Jane Williams", "status": "complete", "lastContacted": "Dec 3, 2025", "daysAgo": null, "filedAt": "ABC-2024-001 > Training > Amendment 4" },
-        { "personId": 3, "name": "Maria Santos", "status": "reminded", "lastContacted": "Dec 15, 2025", "daysAgo": 14 },
-        { "personId": 4, "name": "Dr. Sarah Chen", "status": "complete", "lastContacted": "Dec 2, 2025", "daysAgo": null, "filedAt": "ABC-2024-001 > Training > Amendment 4" }
+        { "personId": 1, "name": "Taylor Example", "status": "reminded", "lastContacted": "Dec 15, 2025", "daysAgo": 14 },
+        { "personId": 2, "name": "Jordan Sample", "status": "complete", "lastContacted": "Dec 3, 2025", "daysAgo": null, "filedAt": "DEMO-ONC-001 > Training > Amendment 4" },
+        { "personId": 3, "name": "Avery Demo", "status": "reminded", "lastContacted": "Dec 15, 2025", "daysAgo": 14 },
+        { "personId": 4, "name": "Dr. Riley Example", "status": "complete", "lastContacted": "Dec 2, 2025", "daysAgo": null, "filedAt": "DEMO-ONC-001 > Training > Amendment 4" }
       ]
     },
     {
@@ -116,10 +116,10 @@
       "sentDate": "Nov 10, 2025",
       "cadenceDays": 7,
       "staff": [
-        { "personId": 1, "name": "Peter Thompson", "status": "complete", "lastContacted": "Nov 12, 2025", "daysAgo": null },
-        { "personId": 2, "name": "Jane Williams", "status": "complete", "lastContacted": "Nov 11, 2025", "daysAgo": null },
-        { "personId": 3, "name": "Maria Santos", "status": "complete", "lastContacted": "Nov 13, 2025", "daysAgo": null },
-        { "personId": 4, "name": "Dr. Sarah Chen", "status": "complete", "lastContacted": "Nov 11, 2025", "daysAgo": null }
+        { "personId": 1, "name": "Taylor Example", "status": "complete", "lastContacted": "Nov 12, 2025", "daysAgo": null },
+        { "personId": 2, "name": "Jordan Sample", "status": "complete", "lastContacted": "Nov 11, 2025", "daysAgo": null },
+        { "personId": 3, "name": "Avery Demo", "status": "complete", "lastContacted": "Nov 13, 2025", "daysAgo": null },
+        { "personId": 4, "name": "Dr. Riley Example", "status": "complete", "lastContacted": "Nov 11, 2025", "daysAgo": null }
       ]
     },
     {
@@ -130,8 +130,8 @@
       "sentDate": "Dec 10, 2025",
       "cadenceDays": 14,
       "staff": [
-        { "personId": 5, "name": "Dr. James Park", "status": "overdue", "lastContacted": "Dec 10, 2025", "daysAgo": 18 },
-        { "personId": 1, "name": "Peter Thompson", "status": "sent", "lastContacted": "Dec 10, 2025", "daysAgo": 18 }
+        { "personId": 5, "name": "Dr. Morgan Sample", "status": "overdue", "lastContacted": "Dec 10, 2025", "daysAgo": 18 },
+        { "personId": 1, "name": "Taylor Example", "status": "sent", "lastContacted": "Dec 10, 2025", "daysAgo": 18 }
       ]
     },
     {
@@ -142,9 +142,9 @@
       "sentDate": "Dec 5, 2025",
       "cadenceDays": 21,
       "staff": [
-        { "personId": 1, "name": "Peter Thompson", "status": "complete", "lastContacted": "Dec 7, 2025", "daysAgo": null },
-        { "personId": 2, "name": "Jane Williams", "status": "sent", "lastContacted": "Dec 5, 2025", "daysAgo": 16 },
-        { "personId": 3, "name": "Maria Santos", "status": "complete", "lastContacted": "Dec 8, 2025", "daysAgo": null }
+        { "personId": 1, "name": "Taylor Example", "status": "complete", "lastContacted": "Dec 7, 2025", "daysAgo": null },
+        { "personId": 2, "name": "Jordan Sample", "status": "sent", "lastContacted": "Dec 5, 2025", "daysAgo": 16 },
+        { "personId": 3, "name": "Avery Demo", "status": "complete", "lastContacted": "Dec 8, 2025", "daysAgo": null }
       ]
     },
     {
@@ -155,8 +155,8 @@
       "sentDate": "Dec 12, 2025",
       "cadenceDays": 14,
       "staff": [
-        { "personId": 3, "name": "Maria Santos", "status": "sent", "lastContacted": "Dec 12, 2025", "daysAgo": 9 },
-        { "personId": 6, "name": "Robert Kim", "status": "complete", "lastContacted": "Dec 14, 2025", "daysAgo": null }
+        { "personId": 3, "name": "Avery Demo", "status": "sent", "lastContacted": "Dec 12, 2025", "daysAgo": 9 },
+        { "personId": 6, "name": "Robin Placeholder", "status": "complete", "lastContacted": "Dec 14, 2025", "daysAgo": null }
       ]
     }
   ]

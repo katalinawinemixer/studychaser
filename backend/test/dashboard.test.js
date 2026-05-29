@@ -4,7 +4,7 @@ import { buildDashboard } from '../src/dashboard.js'
 
 test('buildDashboard returns front-end-ready counts and attention items', () => {
   const output = buildDashboard({
-    studies: [{ id: 1, studyNumber: 'ABC-1', title: 'Demo', status: 'active', activeTrainings: 1, completedTrainings: 2, coordinator: 'Katalina' }],
+    studies: [{ id: 1, studyNumber: 'DEMO-1', title: 'Demo', status: 'active', activeTrainings: 1, completedTrainings: 2, coordinator: 'Alex Demo' }],
     trainings: [{
       id: 10,
       studyId: 1,

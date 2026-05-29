@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { apiGet, apiPost, useApiData } from '../lib/api'
+import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
 
 const EMPTY_FORM = { studyNumber: '', title: '', pi: '', coordinator: '', sponsor: '', irb: '' }
@@ -39,9 +39,11 @@ export default function Studies() {
             <h1 className="page-title">Studies</h1>
             <p className="page-subtitle">{studies.length} active studies with open training requirements.</p>
           </div>
-          <button className="btn btn-primary" onClick={openModal}>
-            <PlusIcon /> Add Study
-          </button>
+          {!IS_READ_ONLY_DEMO && (
+            <button className="btn btn-primary" onClick={openModal}>
+              <PlusIcon /> Add Study
+            </button>
+          )}
         </div>
       </div>
 
@@ -95,7 +97,7 @@ export default function Studies() {
         ))}
       </div>
 
-      {addOpen && (
+      {!IS_READ_ONLY_DEMO && addOpen && (
         <Modal title="Add Study" onClose={closeModal}>
           <form onSubmit={handleSubmit} className="form-stack">
             <div className="form-group">
@@ -104,7 +106,7 @@ export default function Studies() {
                 className="form-input"
                 value={form.studyNumber}
                 onChange={set('studyNumber')}
-                placeholder="e.g. ABC-2024-001"
+                placeholder="e.g. DEMO-ONC-004"
                 required
               />
             </div>
@@ -152,7 +154,7 @@ export default function Studies() {
                 className="form-input"
                 value={form.irb}
                 onChange={set('irb')}
-                placeholder="e.g. WCG IRB"
+                placeholder="e.g. Synthetic IRB"
               />
             </div>
 

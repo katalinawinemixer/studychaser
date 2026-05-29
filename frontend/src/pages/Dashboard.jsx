@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
-import { apiGet, useApiData } from '../lib/api'
+import { IS_READ_ONLY_DEMO, apiGet, useApiData } from '../lib/api'
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -26,12 +26,14 @@ export default function Dashboard() {
       <div className="page-header">
         <div className="page-header-row">
           <div>
-            <h1 className="page-title">Good morning, Katalina 👋</h1>
+            <h1 className="page-title">Good morning, Alex</h1>
             <p className="page-subtitle">{today} — here's what needs your attention today.</p>
           </div>
-          <button className="btn btn-primary" onClick={() => navigate('/training?new=1')}>
-            <PlusIcon /> New Training
-          </button>
+          {!IS_READ_ONLY_DEMO && (
+            <button className="btn btn-primary" onClick={() => navigate('/training?new=1')}>
+              <PlusIcon /> New Training
+            </button>
+          )}
         </div>
       </div>
 

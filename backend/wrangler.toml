@@ -4,6 +4,7 @@ compatibility_date = "2026-04-29"
 
 [vars]
 FRONTEND_ORIGINS = "https://studychaser.katalinalondono.com,https://www.studychaser.katalinalondono.com"
+READ_ONLY_DEMO = "true"
 
 [[kv_namespaces]]
 binding = "STUDYCHASER_KV"

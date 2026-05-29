@@ -85,9 +85,9 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="user-avatar">KM</div>
+          <div className="user-avatar">AD</div>
           <div className="user-info">
-            <div className="name">Katalina M.</div>
+            <div className="name">Alex Demo</div>
             <div className="title">Reg. Coordinator</div>
           </div>
         </div>
