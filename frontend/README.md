@@ -1,8 +1,8 @@
 # StudyChaser Frontend
 
-This is the React front end for StudyChaser — a regulatory training follow-up tracker for clinical research teams.
+This is the React frontend for StudyChaser, a regulatory training follow-up tracker for clinical research teams.
 
-It currently runs off mock data in `src/data/mockData.js`. When you are ready, it can be wired to the backend API in `../Back end`.
+The app is wired through `src/lib/api.js`. In local development it calls the backend API at `http://127.0.0.1:4000/api`. In production, set `VITE_API_BASE_URL` to the deployed API base URL.
 
 ## Run it
 
@@ -37,16 +37,26 @@ confirm    Completion confirmation
 pi         PI escalation
 ```
 
-## Mock data
+## API Configuration
 
-All data lives in `src/data/mockData.js` and includes three studies, six staff members, and five training items with realistic statuses.
-
-## Connecting the backend
-
-When you are ready to use live data instead of mock data, Claude Code can replace the imports from `src/data/mockData.js` with `fetch` calls to the backend API running at:
+Local backend:
 
 ```text
 http://127.0.0.1:4000
+```
+
+Production builds can use:
+
+```bash
+VITE_API_BASE_URL=https://studychaser-api.katalinalondono.workers.dev/api
+```
+
+`src/data/mockData.js` still provides local fallback data when the app is running on localhost and the local backend is not available.
+
+## Verify it
+
+```bash
+npm run build
 ```
 
 ## Tech stack

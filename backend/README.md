@@ -1,6 +1,6 @@
 # StudyChaser Backend
 
-This is a dependency-free Node.js API for the StudyChaser frontend in `../Front End`.
+This is a dependency-free Node.js API for the StudyChaser frontend in `../frontend`.
 
 It keeps the current frontend mock data in `data/db.json` and exposes API routes for studies, people, trainings, dashboard summaries, training staff status updates, and email generation.
 
@@ -97,7 +97,7 @@ curl -s -X PATCH http://127.0.0.1:4000/api/trainings/1/staff/1 \
 
 ## Connecting the frontend
 
-I did not modify the frontend folder. When you are ready, Claude Code can swap the frontend imports from `src/data/mockData.js` to `fetch` calls against these endpoints.
+The frontend API client lives in `../frontend/src/lib/api.js` and calls this API at `http://127.0.0.1:4000/api` during local development.
 
 The backend already allows the Vite dev origin:
 
@@ -105,7 +105,7 @@ The backend already allows the Vite dev origin:
 http://localhost:5173
 ```
 
-Change `FRONTEND_ORIGIN` in `.env` if your frontend runs somewhere else.
+Change `FRONTEND_ORIGINS` in `.env` if your frontend runs somewhere else.
 
 ## Test it
 

@@ -5,8 +5,8 @@ StudyChaser is a regulatory training tracker for clinical study teams. It helps 
 ## Project Structure
 
 ```text
-frontend/   React and Vite web app
-backend/    Node.js API for studies, people, trainings, dashboard summaries, and email generation
+frontend/   React and Vite web app, route views, API client, and production redirects
+backend/    Node.js API, data store, tests, and Cloudflare Worker deployment config
 ```
 
 ## What It Does
@@ -23,6 +23,7 @@ Start the backend API:
 
 ```bash
 cd backend
+npm install
 npm start
 ```
 
@@ -63,6 +64,22 @@ POST /api/email/generate
 
 See `backend/README.md` for the full route list and example requests.
 
+## Verification
+
+Run backend tests:
+
+```bash
+cd backend
+npm test
+```
+
+Build the frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
 ## Tech Stack
 
 - React 18
@@ -74,4 +91,4 @@ See `backend/README.md` for the full route list and example requests.
 
 ## Status
 
-The frontend is connected to the backend API for dashboard data, studies, people, trainings, and email generation.
+The frontend is connected to the backend API for dashboard data, studies, people, trainings, and email generation. The API can run locally with Node or on Cloudflare Workers with KV-backed storage.
