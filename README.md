@@ -25,6 +25,8 @@ backend/    Node.js API, data store, tests, and Cloudflare Worker deployment con
 
 ## What It Does
 
+![StudyChaser dashboard showing synthetic overdue, awaiting, completed, and active-study training counts](docs/assets/screenshots/dashboard.png)
+
 - Shows a dashboard of overdue, awaiting, completed, and active-study training counts.
 - Lists synthetic active studies with PI, coordinator, sponsor, and IRB details.
 - Tracks each training item by staff member, status, last contact date, and filing note.
