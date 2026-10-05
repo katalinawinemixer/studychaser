@@ -93,6 +93,10 @@ PATCH  /api/trainings/:trainingId/staff/:personId
 POST   /api/email/generate
 ```
 
+Request bodies must be JSON objects. Invalid JSON, arrays, scalar values, and
+`null` return HTTP 400. Email previews use stored study, training, and person
+records selected by their IDs; request fields cannot replace those records.
+
 ## Example requests
 
 Generate an email:
