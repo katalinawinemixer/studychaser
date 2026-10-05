@@ -1,3 +1,4 @@
+import { parseJsonObject } from './requestBody.js'
 import seedData from '../data/db.json'
 import { buildDashboard } from './dashboard.js'
 import { isBlockedDemoWrite, isReadOnlyDemo } from './demoMode.js'
@@ -58,7 +59,7 @@ async function route(request, env) {
       return json(request, env, 404, { error: 'Study, training, or person not found' })
     }
 
-    return json(request, env, 200, generateEmail({ study, training, person, ...payload }))
+    return json(request, env, 200, generateEmail({ ...payload, study, training, person }))
   }
 
   if (segments[1] === 'studies') {
@@ -198,13 +199,7 @@ function createWorkerStore(env) {
 
 async function readJson(request) {
   const body = await request.text()
-  if (!body.trim()) return {}
-
-  try {
-    return JSON.parse(body)
-  } catch {
-    throw Object.assign(new Error('Request body must be valid JSON'), { statusCode: 400 })
-  }
+  return parseJsonObject(body)
 }
 
 function json(request, env, status, payload) {

@@ -1,3 +1,4 @@
+import { parseJsonObject } from './requestBody.js'
 import { createServer } from 'node:http'
 import { URL } from 'node:url'
 import { buildDashboard } from './dashboard.js'
@@ -51,7 +52,7 @@ async function route(req, res) {
       return sendJson(res, 404, { error: 'Study, training, or person not found' })
     }
 
-    return sendJson(res, 200, generateEmail({ study, training, person, ...payload }))
+    return sendJson(res, 200, generateEmail({ ...payload, study, training, person }))
   }
 
   if (segments[1] === 'studies') {
@@ -168,13 +169,7 @@ async function handleStaffUpdate({ req, res, data, trainingId, personId }) {
 async function readJson(req) {
   let body = ''
   for await (const chunk of req) body += chunk
-  if (!body.trim()) return {}
-
-  try {
-    return JSON.parse(body)
-  } catch {
-    throw Object.assign(new Error('Request body must be valid JSON'), { statusCode: 400 })
-  }
+  return parseJsonObject(body)
 }
 
 function sendJson(res, statusCode, payload) {

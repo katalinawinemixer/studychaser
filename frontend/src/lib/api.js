@@ -125,7 +125,7 @@ async function fallbackRequest(path, options) {
       throw new Error('Study, training, or person not found')
     }
 
-    return generateEmail({ study, training, person, ...payload })
+    return generateEmail({ ...payload, study, training, person })
   }
 
   throw new Error('This action needs the StudyChaser API to be online.')
