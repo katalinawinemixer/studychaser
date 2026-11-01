@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import { IS_READ_ONLY_DEMO, apiGet, useApiData } from '../lib/api'
 
@@ -21,19 +21,23 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
+    <div className="dashboard">
       {/* Header */}
       <div className="page-header">
         <div className="page-header-row">
           <div>
-            <h1 className="page-title">Good morning, Alex</h1>
-            <p className="page-subtitle">{today} — here's what needs your attention today.</p>
+            <p className="eyebrow">YOUR WORKSPACE, AT A GLANCE</p>
+            <h1 className="page-title">A clearer day ahead, Alex.</h1>
+            <p className="page-subtitle">Keep the follow-ups moving and every study in view.</p>
           </div>
+          <div className="dashboard-header-actions"><span className="dashboard-date">{today}</span>
+          <Link className="btn btn-secondary" to="/training">View training tracker <span aria-hidden="true">↗</span></Link>
           {!IS_READ_ONLY_DEMO && (
             <button className="btn btn-primary" onClick={() => navigate('/training?new=1')}>
               <PlusIcon /> New Training
             </button>
           )}
+          </div>
         </div>
       </div>
 
@@ -42,38 +46,38 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card stat-overdue">
           <div className="stat-icon" style={{ background: '#FEE2E2' }}>
-            <AlertIcon color="#EF4444" />
+            <AlertIcon color="#BC5148" />
           </div>
-          <div className="stat-value" style={{ color: '#EF4444' }}>{overdueCount}</div>
+          <div className="stat-value" style={{ color: '#BC5148' }}>{overdueCount}</div>
           <div className="stat-label">Overdue</div>
           <div className="stat-sub">Require immediate action</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card stat-awaiting">
           <div className="stat-icon" style={{ background: '#FEF3C7' }}>
-            <ClockIcon color="#D97706" />
+            <ClockIcon color="#95651D" />
           </div>
-          <div className="stat-value" style={{ color: '#D97706' }}>{awaitingCount}</div>
+          <div className="stat-value" style={{ color: '#95651D' }}>{awaitingCount}</div>
           <div className="stat-label">Awaiting Response</div>
           <div className="stat-sub">Sent or reminded</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card stat-complete">
           <div className="stat-icon" style={{ background: '#E8F7EF' }}>
-            <CheckIcon color="#2EAA6A" />
+            <CheckIcon color="#32734A" />
           </div>
-          <div className="stat-value" style={{ color: '#2EAA6A' }}>{completedCount}</div>
+          <div className="stat-value" style={{ color: '#32734A' }}>{completedCount}</div>
           <div className="stat-label">Completed</div>
           <div className="stat-sub">Acknowledged &amp; filed</div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card stat-studies">
           <div className="stat-icon" style={{ background: '#EBF2FF' }}>
-            <FileIcon color="#3B82F6" />
+            <FileIcon color="#466E8A" />
           </div>
-          <div className="stat-value" style={{ color: '#3B82F6' }}>{activeStudies}</div>
+          <div className="stat-value" style={{ color: '#466E8A' }}>{activeStudies}</div>
           <div className="stat-label">Active Studies</div>
           <div className="stat-sub">With open trainings</div>
         </div>
@@ -82,8 +86,8 @@ export default function Dashboard() {
       {/* Needs attention */}
       <div className="card">
         <div className="card-header">
-          <span className="card-title">Needs Attention</span>
-          <span className="card-count">{attentionItems.length} items · sorted by urgency</span>
+          <div><h2 className="card-title"><span className="attention-dot" />Needs attention</h2><p className="card-description">A few follow-ups to keep things on track.</p></div>
+          <span className="card-count">{attentionItems.length} to follow up</span>
         </div>
         <div className="table-wrap">
           <table>
@@ -93,19 +97,19 @@ export default function Dashboard() {
                 <th>Training</th>
                 <th>Study</th>
                 <th>Status</th>
-                <th>Days Since Contact</th>
-                <th>Next Action</th>
+                <th>Last contact</th>
+                <th>Next step</th>
               </tr>
             </thead>
             <tbody>
               {attentionItems.map((item, i) => (
                 <tr key={i}>
-                  <td className="td-name">{item.person}</td>
+                  <td className="td-name"><span className="person-cell"><span className="table-avatar" aria-hidden="true">{item.person.replace(/^Dr\. /, '').split(' ').map(part => part[0]).slice(0, 2).join('')}</span>{item.person}</span></td>
                   <td>{item.training}</td>
                   <td><span className="tag">{item.study}</span></td>
                   <td><StatusBadge status={item.status} /></td>
-                  <td style={{ color: item.daysAgo >= 14 ? '#EF4444' : 'inherit', fontWeight: item.daysAgo >= 14 ? '600' : '400' }}>
-                    {item.daysAgo} days
+                  <td style={{ color: item.daysAgo >= 14 ? '#BC5148' : 'inherit', fontWeight: item.daysAgo >= 14 ? '600' : '400' }}>
+                    {item.daysAgo} days ago
                   </td>
                   <td>
                     <button className="action-pill" onClick={() => handleActionPill(item)}>
@@ -119,40 +123,19 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick summary */}
-      <div className="card section">
-        <div className="card-header">
-          <span className="card-title">Training Summary by Study</span>
+      <section className="study-overview section" aria-labelledby="study-overview-title">
+        <div className="overview-header"><div><p className="eyebrow">THE BIGGER PICTURE</p><h2 id="study-overview-title">Your studies</h2></div><Link to="/studies" className="text-link">View all studies <span aria-hidden="true">↗</span></Link></div>
+        <div className="dashboard-studies-grid">
+          {studySummary.map((study, index) => (
+            <Link to={`/training?studyId=${study.id}`} className="dashboard-study" key={study.id}>
+              <div className="dashboard-study-top"><span className={`study-symbol study-symbol-${index % 3}`}><FileIcon color="currentColor" /></span><span className="study-number">{study.studyNumber}</span><span className="study-arrow" aria-hidden="true">↗</span></div>
+              <h3>{study.title}</h3>
+              <p className="study-owner">Coordinated by {study.coordinator}</p>
+              <div className="study-training-counts"><span><strong>{study.activeTrainings}</strong> active trainings</span><span><strong>{study.completedTrainings}</strong> completed</span></div>
+            </Link>
+          ))}
         </div>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Study</th>
-                <th>Title</th>
-                <th>Active Trainings</th>
-                <th>Completed Trainings</th>
-                <th>Coordinator</th>
-              </tr>
-            </thead>
-            <tbody>
-              {studySummary.map(s => (
-                <tr key={s.id}>
-                  <td><span className="tag">{s.studyNumber}</span></td>
-                  <td className="td-name">{s.title}</td>
-                  <td>
-                    <span style={{ fontWeight: 600, color: s.activeTrainings > 0 ? '#D97706' : 'inherit' }}>
-                      {s.activeTrainings}
-                    </span>
-                  </td>
-                  <td style={{ color: '#2EAA6A', fontWeight: 600 }}>{s.completedTrainings}</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{s.coordinator}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </section>
     </div>
   )
 }

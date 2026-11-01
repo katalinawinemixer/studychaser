@@ -77,18 +77,18 @@ export default function Studies() {
 
             <div className="study-stats">
               <div>
-                <div className="study-stat-val" style={{ color: study.activeTrainings > 0 ? '#D97706' : 'inherit' }}>
+                <div className="study-stat-val" style={{ color: study.activeTrainings > 0 ? '#95651D' : 'inherit' }}>
                   {study.activeTrainings}
                 </div>
                 <div className="study-stat-label">Active Trainings</div>
               </div>
               <div>
-                <div className="study-stat-val" style={{ color: '#2EAA6A' }}>{study.completedTrainings}</div>
+                <div className="study-stat-val" style={{ color: '#32734A' }}>{study.completedTrainings}</div>
                 <div className="study-stat-label">Completed</div>
               </div>
               <div style={{ marginLeft: 'auto' }}>
                 <span className="badge complete" style={{ fontSize: '11px' }}>
-                  <span className="badge-dot" style={{ background: '#2EAA6A' }} />
+                  <span className="badge-dot" style={{ background: '#32734A' }} />
                   Active
                 </span>
               </div>
@@ -173,7 +173,7 @@ export default function Studies() {
   )
 }
 
-const Req        = () => <span style={{ color: '#EF4444' }}>*</span>
+const Req        = () => <span style={{ color: '#BC5148' }}>*</span>
 const PlusIcon   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 const PersonIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 const CoordIcon  = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>

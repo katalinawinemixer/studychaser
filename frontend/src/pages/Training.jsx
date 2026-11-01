@@ -9,7 +9,7 @@ const EMPTY_FORM = { studyId: '', title: '', version: '', sentDate: '', cadenceD
 export default function Training() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [selectedStudyId, setSelectedStudyId] = useState('all')
+  const [selectedStudyId, setSelectedStudyId] = useState(() => searchParams.get('studyId') || 'all')
   const [openIds, setOpenIds] = useState([1, 3])
   const { data, loading, error, refetch } = useApiData(
     async () => {
@@ -84,8 +84,9 @@ export default function Training() {
       {loading && <div className="api-message">Loading trainings...</div>}
 
       <div className="training-filter">
-        <label>Filter by study:</label>
+        <label htmlFor="study-filter">Filter by study:</label>
         <select
+          id="study-filter"
           value={selectedStudyId}
           onChange={e => setSelectedStudyId(e.target.value)}
         >
@@ -114,14 +115,18 @@ export default function Training() {
 
         return (
           <div className="training-block" key={training.id}>
-            <div className="training-block-header" onClick={() => toggle(training.id)}>
+            <div className="training-block-header" role="button" tabIndex={0}
+              aria-expanded={isOpen} aria-controls={`training-panel-${training.id}`}
+              onClick={() => toggle(training.id)}
+              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(training.id) } }}>
+
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span className="training-block-title">{training.title}</span>
                   <span className="tag">{study?.studyNumber ?? 'Unknown study'}</span>
                   {hasUrgent && (
-                    <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 600 }}>
-                      ⚠ Needs attention
+                    <span style={{ fontSize: '11px', color: '#95651D', fontWeight: 600 }}>
+                      Needs attention
                     </span>
                   )}
                 </div>
@@ -133,18 +138,18 @@ export default function Training() {
               <div className="training-block-right">
                 <div className="progress-chips">
                   <span className="badge complete" style={{ fontSize: '11px' }}>
-                    <span className="badge-dot" style={{ background: '#2EAA6A' }} />
+                    <span className="badge-dot" style={{ background: '#32734A' }} />
                     {done}/{total} complete
                   </span>
                   {countByStatus(training.staff, 'overdue') > 0 && (
                     <span className="badge overdue" style={{ fontSize: '11px' }}>
-                      <span className="badge-dot" style={{ background: '#EF4444' }} />
+                      <span className="badge-dot" style={{ background: '#BC5148' }} />
                       {countByStatus(training.staff, 'overdue')} overdue
                     </span>
                   )}
                   {countByStatus(training.staff, 'reminded') > 0 && (
                     <span className="badge reminded" style={{ fontSize: '11px' }}>
-                      <span className="badge-dot" style={{ background: '#D97706' }} />
+                      <span className="badge-dot" style={{ background: '#95651D' }} />
                       {countByStatus(training.staff, 'reminded')} reminded
                     </span>
                   )}
@@ -154,7 +159,7 @@ export default function Training() {
             </div>
 
             {isOpen && (
-              <div className="training-block-table">
+              <div className="training-block-table" id={`training-panel-${training.id}`}>
                 <table>
                   <thead>
                     <tr>
@@ -175,7 +180,7 @@ export default function Training() {
                         <td>
                           {member.daysAgo != null ? (
                             <span style={{
-                              color: member.daysAgo >= training.cadenceDays ? '#EF4444' : 'inherit',
+                              color: member.daysAgo >= training.cadenceDays ? '#BC5148' : 'inherit',
                               fontWeight: member.daysAgo >= training.cadenceDays ? 600 : 400,
                             }}>
                               {member.daysAgo} days
@@ -189,7 +194,7 @@ export default function Training() {
                         </td>
                         <td>
                           {member.status === 'complete' ? (
-                            <span style={{ fontSize: '12px', color: '#2EAA6A' }}>✓ Filed</span>
+                            <span style={{ fontSize: '12px', color: '#32734A' }}>✓ Filed</span>
                           ) : (
                             <button
                               className="action-pill"
@@ -280,7 +285,7 @@ export default function Training() {
   )
 }
 
-const Req      = () => <span style={{ color: '#EF4444' }}>*</span>
+const Req      = () => <span style={{ color: '#BC5148' }}>*</span>
 const PlusIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 
 function ChevronIcon({ open }) {
