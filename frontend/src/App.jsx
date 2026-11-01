@@ -6,17 +6,28 @@ import Training from './pages/Training'
 import People from './pages/People'
 import EmailGenerator from './pages/EmailGenerator'
 import { IS_READ_ONLY_DEMO } from './lib/api'
+import { useLocation } from 'react-router-dom'
+
+function WorkspaceHeader() {
+  const { pathname } = useLocation()
+  const title = { '/dashboard': 'Overview', '/studies': 'Studies', '/training': 'Training tracker', '/people': 'People', '/email': 'Email preview' }[pathname] ?? 'Workspace'
+  return <header className="workspace-header"><div><span className="workspace-name">Study workspace</span><span className="breadcrumb-divider">/</span><span>{title}</span></div><span className="workspace-status"><span />Portfolio demo</span></header>
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <div className="app-layout">
+        <a className="skip-link" href="#main-content">Skip to content</a>
         <Sidebar />
-        <main className="main-content">
+        <main className="main-content" id="main-content">
+          <WorkspaceHeader />
+          <div className="page-content">
           {IS_READ_ONLY_DEMO && (
             <div className="demo-banner">
-              <strong>Read-only portfolio demo.</strong>
-              <span>All study, staff, and training data is synthetic. Data edits are available only when running locally.</span>
+              <span className="demo-mark" aria-hidden="true">i</span>
+              <strong>A little look inside StudyChaser.</strong>
+              <span>Explore with synthetic data. Read-only demo; emails are preview only.</span>
             </div>
           )}
           <Routes>
@@ -27,6 +38,8 @@ export default function App() {
             <Route path="/people" element={<People />} />
             <Route path="/email" element={<EmailGenerator />} />
           </Routes>
+          <footer className="workspace-footer">StudyChaser <span>Built for the details that keep research moving.</span></footer>
+          </div>
         </main>
       </div>
     </BrowserRouter>

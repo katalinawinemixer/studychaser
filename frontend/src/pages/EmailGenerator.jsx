@@ -112,8 +112,8 @@ export default function EmailGenerator() {
           </div>
           <div className="form-stack">
             <div className="form-group">
-              <label className="form-label">Study</label>
-              <select
+              <label className="form-label" htmlFor="email-study">Study</label>
+              <select id="email-study"
                 className="form-select"
                 value={studyId}
                 onChange={e => { setStudyId(e.target.value); setTrainingId(''); setPersonId('') }}
@@ -127,8 +127,8 @@ export default function EmailGenerator() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Training Item</label>
-              <select
+              <label className="form-label" htmlFor="email-training">Training Item</label>
+              <select id="email-training"
                 className="form-select"
                 value={trainingId}
                 onChange={e => { setTrainingId(e.target.value); setPersonId('') }}
@@ -142,8 +142,8 @@ export default function EmailGenerator() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Recipient</label>
-              <select
+              <label className="form-label" htmlFor="email-recipient">Recipient</label>
+              <select id="email-recipient"
                 className="form-select"
                 value={personId}
                 onChange={e => setPersonId(e.target.value)}
@@ -162,8 +162,8 @@ export default function EmailGenerator() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email Type</label>
-              <select
+              <label className="form-label" htmlFor="email-type">Email Type</label>
+              <select id="email-type"
                 className="form-select"
                 value={emailType}
                 onChange={e => setEmailType(e.target.value)}
@@ -234,7 +234,7 @@ export default function EmailGenerator() {
 const CopyIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
 
 const MailIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C8D6E5" strokeWidth="1.5" strokeLinecap="round">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#536451" strokeWidth="1.5" strokeLinecap="round">
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
     <polyline points="22,6 12,13 2,6"/>
   </svg>

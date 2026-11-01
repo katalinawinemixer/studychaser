@@ -51,9 +51,9 @@ const LogoIcon = () => (
 const navLinks = [
   { to: '/dashboard', label: 'Dashboard',        icon: DashIcon },
   { to: '/studies',   label: 'Studies',           icon: StudyIcon },
-  { to: '/training',  label: 'Training Tracker',  icon: TrainingIcon },
+  { to: '/training',  label: 'Training tracker',  icon: TrainingIcon },
   { to: '/people',    label: 'People',             icon: PeopleIcon },
-  { to: '/email',     label: 'Email Generator',   icon: EmailIcon },
+  { to: '/email',     label: 'Email preview',   icon: EmailIcon },
 ]
 
 export default function Sidebar() {
@@ -63,14 +63,14 @@ export default function Sidebar() {
         <div className="sidebar-logo-mark">
           <div className="logo-icon"><LogoIcon /></div>
           <div>
-            <h1>StudyChaser</h1>
-            <p>Regulatory Training Tracker</p>
+            <div className="brand-name">StudyChaser<span>.</span></div>
+            <p>Research, kept on track</p>
           </div>
         </div>
       </div>
 
-      <nav className="sidebar-nav">
-        <div className="nav-label">Navigation</div>
+      <nav className="sidebar-nav" aria-label="Main navigation">
+        <div className="nav-label">Workspace</div>
         {navLinks.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
@@ -83,6 +83,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      <div className="sidebar-note"><span className="sidebar-note-label">A little less chasing.</span><p>A clearer view of your study training, all in one place.</p><NavLink to="/training">View training tracker <span aria-hidden="true">↗</span></NavLink></div>
       <div className="sidebar-footer">
         <div className="sidebar-user">
           <div className="user-avatar">AD</div>
