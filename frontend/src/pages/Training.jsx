@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import StatusBadge from '../components/StatusBadge'
 import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
+import TrainingStaffList from '../components/TrainingStaffList'
 
 const EMPTY_FORM = { studyId: '', title: '', version: '', sentDate: '', cadenceDays: 14 }
 
 export default function Training() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const [selectedStudyId, setSelectedStudyId] = useState(() => searchParams.get('studyId') || 'all')
-  const [openIds, setOpenIds] = useState([1, 3])
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedStudyId = searchParams.get('studyId') || 'all'
+  const [expandedGroups, setExpandedGroups] = useState({})
   const { data, loading, error, refetch } = useApiData(
     async () => {
       const [trainings, studies] = await Promise.all([apiGet('/trainings'), apiGet('/studies')])
@@ -58,9 +58,14 @@ export default function Training() {
     ? trainings
     : trainings.filter(t => t.studyId === Number(selectedStudyId))
 
-  const toggle = id => setOpenIds(prev =>
-    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-  )
+  function selectStudy(value) {
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      if (value === 'all') next.delete('studyId')
+      else next.set('studyId', value)
+      return next
+    })
+  }
 
   const countByStatus = (staff, status) => staff.filter(s => s.status === status).length
 
@@ -81,14 +86,15 @@ export default function Training() {
       </div>
 
       {error && <div className="api-message api-error">{error}</div>}
-      {loading && <div className="api-message">Loading trainings...</div>}
+      {loading && <div className="api-message" role="status">Loading trainings...</div>}
 
       <div className="training-filter">
         <label htmlFor="study-filter">Filter by study:</label>
         <select
           id="study-filter"
           value={selectedStudyId}
-          onChange={e => setSelectedStudyId(e.target.value)}
+          onChange={e => selectStudy(e.target.value)}
+          disabled={loading}
         >
           <option value="all">All Studies</option>
           {studies.map(s => (
@@ -97,31 +103,32 @@ export default function Training() {
         </select>
       </div>
 
-      {filtered.length === 0 && (
+      {!loading && !error && filtered.length === 0 && (
         <div className="card card-pad">
           <div className="empty-state">
             <h3>No trainings found</h3>
-            <p>Try selecting a different study or add a new training item.</p>
+            <p>{selectedStudyId !== 'all' ? 'This study has no training items to display.' : 'No training items are available yet.'}</p>
+            {selectedStudyId !== 'all' && <button className="btn btn-secondary" onClick={() => selectStudy('all')}>View all studies</button>}
           </div>
         </div>
       )}
 
       {filtered.map(training => {
         const study   = studies.find(s => s.id === training.studyId)
-        const isOpen  = openIds.includes(training.id)
         const done    = countByStatus(training.staff, 'complete')
         const total   = training.staff.length
-        const hasUrgent = training.staff.some(s => s.status === 'overdue' || s.status === 'reminded')
+        const hasUrgent = training.staff.some(member => member.status === 'overdue' ||
+          (['sent', 'reminded'].includes(member.status) && member.daysAgo >= training.cadenceDays))
+        const isOpen = expandedGroups[training.id] ?? hasUrgent
 
         return (
           <div className="training-block" key={training.id}>
-            <div className="training-block-header" role="button" tabIndex={0}
+            <button type="button" className="training-block-header"
               aria-expanded={isOpen} aria-controls={`training-panel-${training.id}`}
-              onClick={() => toggle(training.id)}
-              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(training.id) } }}>
+              onClick={() => setExpandedGroups(previous => ({ ...previous, [training.id]: !isOpen }))}>
 
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span className="training-heading-text">
+                <span className="training-heading-title">
                   <span className="training-block-title">{training.title}</span>
                   <span className="tag">{study?.studyNumber ?? 'Unknown study'}</span>
                   {hasUrgent && (
@@ -129,16 +136,16 @@ export default function Training() {
                       Needs attention
                     </span>
                   )}
-                </div>
-                <div className="training-block-meta">
+                </span>
+                <span className="training-block-meta">
                   {training.version} · Sent {training.sentDate} · Follow-up every {training.cadenceDays} days
-                </div>
-              </div>
+                </span>
+              </span>
 
-              <div className="training-block-right">
-                <div className="progress-chips">
-                  <span className="badge complete" style={{ fontSize: '11px' }}>
-                    <span className="badge-dot" style={{ background: '#32734A' }} />
+              <span className="training-block-right">
+                <span className="progress-chips">
+                  <span className={`badge ${done === total && total > 0 ? 'complete' : 'completion-count'}`}>
+                    <span className="badge-dot" />
                     {done}/{total} complete
                   </span>
                   {countByStatus(training.staff, 'overdue') > 0 && (
@@ -153,63 +160,14 @@ export default function Training() {
                       {countByStatus(training.staff, 'reminded')} reminded
                     </span>
                   )}
-                </div>
+                </span>
                 <ChevronIcon open={isOpen} />
-              </div>
-            </div>
+              </span>
+            </button>
 
-            {isOpen && (
-              <div className="training-block-table" id={`training-panel-${training.id}`}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Staff Member</th>
-                      <th>Status</th>
-                      <th>Last Contacted</th>
-                      <th>Days Since Contact</th>
-                      <th>Filing Note</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {training.staff.map((member, i) => (
-                      <tr key={i}>
-                        <td className="td-name">{member.name}</td>
-                        <td><StatusBadge status={member.status} /></td>
-                        <td style={{ color: 'var(--text-muted)' }}>{member.lastContacted}</td>
-                        <td>
-                          {member.daysAgo != null ? (
-                            <span style={{
-                              color: member.daysAgo >= training.cadenceDays ? '#BC5148' : 'inherit',
-                              fontWeight: member.daysAgo >= training.cadenceDays ? 600 : 400,
-                            }}>
-                              {member.daysAgo} days
-                            </span>
-                          ) : (
-                            <span style={{ color: 'var(--text-muted)' }}>—</span>
-                          )}
-                        </td>
-                        <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
-                          {member.filedAt ?? '—'}
-                        </td>
-                        <td>
-                          {member.status === 'complete' ? (
-                            <span style={{ fontSize: '12px', color: '#32734A' }}>✓ Filed</span>
-                          ) : (
-                            <button
-                              className="action-pill"
-                              onClick={() => handleAction(training, member)}
-                            >
-                              {member.status === 'overdue' ? 'Escalate' : 'Remind'}
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div id={`training-panel-${training.id}`} hidden={!isOpen}>
+              {isOpen && <TrainingStaffList training={training} onAction={handleAction} />}
+            </div>
           </div>
         )
       })}

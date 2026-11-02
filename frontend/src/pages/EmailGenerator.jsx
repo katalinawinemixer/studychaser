@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { apiGet, apiPost, useApiData } from '../lib/api'
 
@@ -20,6 +20,9 @@ export default function EmailGenerator() {
   const [email,      setEmail]      = useState(null)
   const [emailError, setEmailError] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
+  const [copyError, setCopyError] = useState('')
+  const [previewAttempt, setPreviewAttempt] = useState(0)
+  const copiedTimer = useRef(null)
 
   const { data, loading, error } = useApiData(
     async () => {
@@ -47,6 +50,10 @@ export default function EmailGenerator() {
     : []
 
   useEffect(() => {
+    clearTimeout(copiedTimer.current)
+    setCopied(false)
+    setCopyError('')
+    setEmail(null)
     if (!studyId || !trainingId || !personId) {
       setEmail(null)
       setEmailError('')
@@ -80,35 +87,43 @@ export default function EmailGenerator() {
 
     return () => {
       active = false
+      clearTimeout(copiedTimer.current)
     }
-  }, [studyId, trainingId, personId, emailType])
+  }, [studyId, trainingId, personId, emailType, previewAttempt])
 
-  const handleCopy = () => {
-    if (!email) return
+  const handleCopy = async () => {
+    if (!email || emailLoading) return
     const text = `Subject: ${email.subject}\n\n${email.body}`
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopyError('')
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      clearTimeout(copiedTimer.current)
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
+      setCopyError('Could not copy the email. Select the subject and message below to copy them manually.')
+    }
   }
 
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Email Generator</h1>
+        <h1 className="page-title">Email preview</h1>
         <p className="page-subtitle">
-          Preview a synthetic follow-up email from the backend. Copy the sample text for review.
+          Preview a synthetic follow-up email, then copy the text for review.
         </p>
       </div>
 
       {error && <div className="api-message api-error">{error}</div>}
-      {loading && <div className="api-message">Loading email options...</div>}
-      {emailError && <div className="api-message api-error">{emailError}</div>}
+      {loading && <div className="api-message" role="status">Loading email options...</div>}
+      {emailError && <div className="api-message api-error" role="alert">{emailError}</div>}
 
       <div className="email-layout">
         {/* Form panel */}
         <div className="card card-pad">
           <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '18px', color: 'var(--text)' }}>
-            Configure Email
+            Configure preview
           </div>
           <div className="form-stack">
             <div className="form-group">
@@ -175,38 +190,33 @@ export default function EmailGenerator() {
               </select>
             </div>
 
-            <button
-              className="btn btn-primary"
-              style={{ marginTop: '4px', justifyContent: 'center' }}
-              onClick={handleCopy}
-              disabled={!email || emailLoading}
-            >
-              <CopyIcon />
-              {emailLoading ? 'Generating...' : copied ? 'Copied!' : 'Copy to Clipboard'}
-            </button>
           </div>
         </div>
 
         {/* Preview panel */}
-        <div className="email-preview">
+        <section className="email-preview" aria-labelledby="email-preview-title" aria-busy={emailLoading}>
           <div className="email-preview-header">
-            <span>Email Preview</span>
-            {email && (
-              <button className="btn btn-secondary btn-sm" onClick={handleCopy}>
-                <CopyIcon /> {copied ? 'Copied!' : 'Copy'}
-              </button>
-            )}
+            <h2 id="email-preview-title">Email preview</h2>
+            <button className="btn btn-primary" onClick={handleCopy} disabled={!email || emailLoading}>
+              <CopyIcon /> {copied ? 'Copied' : 'Copy email'}
+            </button>
           </div>
+          <div className="copy-feedback" role="status">{copied ? 'Email copied.' : ''}</div>
+          {copyError && <div className="api-message api-error" role="alert">{copyError}</div>}
 
           {emailLoading ? (
-            <div className="empty-state" style={{ padding: '80px 20px' }}>
+            <div className="empty-state" role="status" style={{ padding: '80px 20px' }}>
               <MailIcon />
-              <h3 style={{ marginTop: '14px' }}>Generating email...</h3>
-              <p>The backend is preparing the selected follow-up template.</p>
+              <h3 style={{ marginTop: '14px' }}>Preparing email preview...</h3>
+              <p>Your selected follow-up template will appear here.</p>
             </div>
           ) : email ? (
             <>
               <div className="email-meta">
+                <div className="email-meta-row">
+                  <span className="meta-label">Study:</span>
+                  <span className="meta-val">{study?.studyNumber} — {study?.title}</span>
+                </div>
                 <div className="email-meta-row">
                   <span className="meta-label">To:</span>
                   <span className="meta-val">{person?.name} &lt;{person?.email}&gt;</span>
@@ -218,14 +228,20 @@ export default function EmailGenerator() {
               </div>
               <div className="email-body">{email.body}</div>
             </>
+          ) : emailError ? (
+            <div className="empty-state">
+              <h3>Preview unavailable</h3>
+              <p>Check your selections or try preparing this preview again.</p>
+              <button className="btn btn-secondary" onClick={() => setPreviewAttempt(value => value + 1)}>Try again</button>
+            </div>
           ) : (
             <div className="empty-state" style={{ padding: '80px 20px' }}>
               <MailIcon />
-              <h3 style={{ marginTop: '14px' }}>No email generated yet</h3>
-              <p>Select a study, training, and recipient to generate a follow-up email.</p>
+              <h3 style={{ marginTop: '14px' }}>Choose an email to preview</h3>
+              <p>Select a study, training, and recipient to preview a follow-up email.</p>
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   )

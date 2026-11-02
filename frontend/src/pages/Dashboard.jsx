@@ -42,54 +42,15 @@ export default function Dashboard() {
       </div>
 
       {error && <div className="api-message api-error">{error}</div>}
-      {loading && <div className="api-message">Loading dashboard data...</div>}
-
-      {/* Stat cards */}
-      <div className="stats-grid">
-        <div className="stat-card stat-overdue">
-          <div className="stat-icon" style={{ background: '#FEE2E2' }}>
-            <AlertIcon color="#BC5148" />
-          </div>
-          <div className="stat-value" style={{ color: '#BC5148' }}>{overdueCount}</div>
-          <div className="stat-label">Overdue</div>
-          <div className="stat-sub">Require immediate action</div>
-        </div>
-
-        <div className="stat-card stat-awaiting">
-          <div className="stat-icon" style={{ background: '#FEF3C7' }}>
-            <ClockIcon color="#95651D" />
-          </div>
-          <div className="stat-value" style={{ color: '#95651D' }}>{awaitingCount}</div>
-          <div className="stat-label">Awaiting Response</div>
-          <div className="stat-sub">Sent or reminded</div>
-        </div>
-
-        <div className="stat-card stat-complete">
-          <div className="stat-icon" style={{ background: '#E8F7EF' }}>
-            <CheckIcon color="#32734A" />
-          </div>
-          <div className="stat-value" style={{ color: '#32734A' }}>{completedCount}</div>
-          <div className="stat-label">Completed</div>
-          <div className="stat-sub">Acknowledged &amp; filed</div>
-        </div>
-
-        <div className="stat-card stat-studies">
-          <div className="stat-icon" style={{ background: '#EBF2FF' }}>
-            <FileIcon color="#466E8A" />
-          </div>
-          <div className="stat-value" style={{ color: '#466E8A' }}>{activeStudies}</div>
-          <div className="stat-label">Active Studies</div>
-          <div className="stat-sub">With open trainings</div>
-        </div>
-      </div>
+      {loading && <div className="api-message" role="status">Loading dashboard data...</div>}
 
       {/* Needs attention */}
-      <div className="card">
+      <section className="card attention-card" aria-labelledby="needs-attention-title" aria-busy={loading}>
         <div className="card-header">
-          <div><h2 className="card-title"><span className="attention-dot" />Needs attention</h2><p className="card-description">A few follow-ups to keep things on track.</p></div>
-          <span className="card-count">{attentionItems.length} to follow up</span>
+          <div><h2 className="card-title" id="needs-attention-title"><span className="attention-dot" />Needs attention</h2><p className="card-description">Preview the next follow-up for each outstanding acknowledgment.</p></div>
+          <span className="card-count">{loading || error ? '—' : `${attentionItems.length} to follow up`}</span>
         </div>
-        <div className="table-wrap">
+        <div className="table-wrap attention-desktop">
           <table>
             <thead>
               <tr>
@@ -113,13 +74,67 @@ export default function Dashboard() {
                   </td>
                   <td>
                     <button className="action-pill" onClick={() => handleActionPill(item)}>
-                      {item.nextAction}
+                      {item.status === 'overdue' ? 'Preview PI escalation' : 'Preview reminder'}
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        <ul className="attention-mobile">
+          {attentionItems.map(item => (
+            <li className="staff-person" key={`${item.trainingId}-${item.personId}`}>
+              <div className="staff-person-heading"><span className="td-name">{item.person}</span><StatusBadge status={item.status} /></div>
+              <div className="attention-training">{item.training}</div>
+              <span className="tag">{item.study}</span>
+              <span className="contact-age contact-due">Last contacted {item.daysAgo} {item.daysAgo === 1 ? 'day' : 'days'} ago</span>
+              <button className="action-pill" onClick={() => handleActionPill(item)}
+                aria-label={`${item.status === 'overdue' ? 'Preview PI escalation' : 'Preview reminder'} for ${item.person}`}>
+                {item.status === 'overdue' ? 'Preview PI escalation' : 'Preview reminder'}
+              </button>
+            </li>
+          ))}
+        </ul>
+        {!loading && !error && attentionItems.length === 0 && <p className="training-staff-message">No follow-ups are due. Check the training tracker for other outstanding acknowledgments.</p>}
+      </section>
+
+      <h2 className="workspace-summary-title">Workspace summary</h2>
+      <div className="stats-grid">
+        <div className="stat-card stat-overdue">
+          <div className="stat-icon" style={{ background: '#FEE2E2' }}>
+            <AlertIcon color="#BC5148" />
+          </div>
+          <div className="stat-value" style={{ color: '#BC5148' }}>{loading || error ? '—' : overdueCount}</div>
+          <div className="stat-label">Overdue</div>
+          <div className="stat-sub">Require immediate action</div>
+        </div>
+
+        <div className="stat-card stat-awaiting">
+          <div className="stat-icon" style={{ background: '#FEF3C7' }}>
+            <ClockIcon color="#95651D" />
+          </div>
+          <div className="stat-value" style={{ color: '#95651D' }}>{loading || error ? '—' : awaitingCount}</div>
+          <div className="stat-label">Awaiting Response</div>
+          <div className="stat-sub">Sent or reminded</div>
+        </div>
+
+        <div className="stat-card stat-complete">
+          <div className="stat-icon" style={{ background: '#E8F7EF' }}>
+            <CheckIcon color="#32734A" />
+          </div>
+          <div className="stat-value" style={{ color: '#32734A' }}>{loading || error ? '—' : completedCount}</div>
+          <div className="stat-label">Completed</div>
+          <div className="stat-sub">Acknowledged &amp; filed</div>
+        </div>
+
+        <div className="stat-card stat-studies">
+          <div className="stat-icon" style={{ background: '#EBF2FF' }}>
+            <FileIcon color="#466E8A" />
+          </div>
+          <div className="stat-value" style={{ color: '#466E8A' }}>{loading || error ? '—' : activeStudies}</div>
+          <div className="stat-label">Active Studies</div>
+          <div className="stat-sub">With open trainings</div>
         </div>
       </div>
 
