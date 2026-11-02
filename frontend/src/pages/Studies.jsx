@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
 
@@ -37,7 +38,7 @@ export default function Studies() {
         <div className="page-header-row">
           <div>
             <h1 className="page-title">Studies</h1>
-            <p className="page-subtitle">{studies.length} active studies with open training requirements.</p>
+            <p className="page-subtitle">{loading ? 'Study training requirements and team details.' : `${studies.length} active studies with open training requirements.`}</p>
           </div>
           {!IS_READ_ONLY_DEMO && (
             <button className="btn btn-primary" onClick={openModal}>
@@ -48,7 +49,7 @@ export default function Studies() {
       </div>
 
       {error && <div className="api-message api-error">{error}</div>}
-      {loading && <div className="api-message">Loading studies...</div>}
+      {loading && <div className="api-message" role="status">Loading studies...</div>}
 
       <div className="studies-grid">
         {studies.map(study => (
@@ -93,6 +94,10 @@ export default function Studies() {
                 </span>
               </div>
             </div>
+            <Link className="btn btn-secondary study-training-link" to={`/training?studyId=${study.id}`}
+              aria-label={`View training for ${study.studyNumber}`}>
+              View training <span aria-hidden="true">↗</span>
+            </Link>
           </div>
         ))}
       </div>
