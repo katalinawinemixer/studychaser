@@ -1,3 +1,5 @@
+import { updateTrainingMember } from '../../shared/trainingRecords.js'
+import { workspaceView } from '../../shared/workspace.js'
 import { parseJsonObject } from './requestBody.js'
 import { createServer } from 'node:http'
 import { URL } from 'node:url'
@@ -36,7 +38,8 @@ async function route(req, res) {
     return sendJson(res, 200, { ok: true, service: 'studychaser-backend' })
   }
 
-  const data = await store.read()
+  const storedData = await store.read()
+  const data = req.method === 'GET' || segments[1] === 'email' ? workspaceView(storedData) : storedData
 
   if (req.method === 'GET' && segments[1] === 'dashboard' && segments[2] === 'summary') {
     return sendJson(res, 200, buildDashboard(data))
@@ -52,7 +55,7 @@ async function route(req, res) {
       return sendJson(res, 404, { error: 'Study, training, or person not found' })
     }
 
-    return sendJson(res, 200, generateEmail({ ...payload, study, training, person }))
+    return sendJson(res, 200, generateEmail({ ...payload, study, training, person, people: data.people }))
   }
 
   if (segments[1] === 'studies') {
@@ -157,10 +160,7 @@ async function handleStaffUpdate({ req, res, data, trainingId, personId }) {
   if (index === -1) return sendJson(res, 404, { error: 'Training staff member not found' })
 
   const payload = await readJson(req)
-  training.staff[index] = {
-    ...training.staff[index],
-    ...pick(payload, ['status', 'lastContacted', 'daysAgo', 'filedAt']),
-  }
+  updateTrainingMember(training, index, payload)
 
   await store.write(data)
   return sendJson(res, 200, training.staff[index])
@@ -197,13 +197,6 @@ function corsHeaders(req) {
     'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   }
-}
-
-function pick(source, keys) {
-  return keys.reduce((out, key) => {
-    if (Object.hasOwn(source, key)) out[key] = source[key]
-    return out
-  }, {})
 }
 
 server.listen(PORT, HOST, () => {

@@ -40,7 +40,7 @@ Run it locally with the Worker runtime:
 npm run dev:worker
 ```
 
-The Worker uses the `STUDYCHASER_KV` binding configured in `wrangler.toml`. On first request, it seeds KV from `data/db.json`.
+The Worker uses the `STUDYCHASER_KV` binding configured in `wrangler.toml`. Read-only demo mode serves the bundled synthetic snapshot from `data/db.json`, so new examples appear without overwriting stored KV records. Writable mode uses KV and seeds it on first request if no dataset exists.
 
 `READ_ONLY_DEMO=true` in `wrangler.toml` blocks public data writes in the deployed Worker.
 

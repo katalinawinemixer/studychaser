@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
 
@@ -62,11 +63,12 @@ export default function People() {
             <p className="page-subtitle">
               {people.length} staff members across {studies.length} studies.
               {missingAnyone.length > 0 && (
-                <span style={{ color: '#95651D', fontWeight: 600 }}>
-                  {' '}{missingAnyone.length} {missingAnyone.length === 1 ? 'person has' : 'people have'} outstanding trainings.
+                <span>
+                  {' '}{missingAnyone.length} {missingAnyone.length === 1 ? 'person has' : 'people have'} pending acknowledgments.
                 </span>
               )}
             </p>
+            <p className="scope-note">Counts are staff training records. Awaiting filing is part of the completed count.</p>
           </div>
           {!IS_READ_ONLY_DEMO && (
             <button className="btn btn-primary" onClick={openModal}>
@@ -88,12 +90,11 @@ export default function People() {
               <div className="person-header">
                 <div
                   className="person-avatar"
-                  style={person.missingTrainings > 0 ? { background: '#FEF3C7', color: '#95651D' } : {}}
                 >
                   {initials(person.name)}
                 </div>
                 <div>
-                  <div className="person-name">{person.name}</div>
+                  <Link className="person-name" to={`/training?staffId=${person.id}`}>{person.name}</Link>
                   <div className="person-role">{person.role}</div>
                   <div className="person-email">{person.email}</div>
                 </div>
@@ -106,35 +107,11 @@ export default function People() {
               </div>
 
               <div className="person-stats">
-                <div>
-                  <div
-                    className="person-stat-val"
-                    style={{ color: person.missingTrainings > 0 ? '#95651D' : '#32734A' }}
-                  >
-                    {person.missingTrainings}
-                  </div>
-                  <div className="person-stat-label">Outstanding</div>
-                </div>
-                <div>
-                  <div className="person-stat-val" style={{ color: '#32734A' }}>
-                    {person.completedTrainings}
-                  </div>
-                  <div className="person-stat-label">Completed</div>
-                </div>
-                <div style={{ marginLeft: 'auto', alignSelf: 'flex-end' }}>
-                  {person.missingTrainings === 0 ? (
-                    <span className="badge complete" style={{ fontSize: '11px' }}>
-                      <span className="badge-dot" style={{ background: '#32734A' }} />
-                      Up to date
-                    </span>
-                  ) : (
-                    <span className="badge reminded" style={{ fontSize: '11px' }}>
-                      <span className="badge-dot" style={{ background: '#95651D' }} />
-                      Action needed
-                    </span>
-                  )}
-                </div>
+                <Link to={`/training?staffId=${person.id}&work=pending`} aria-label={`Review ${person.missingTrainings} pending ${person.missingTrainings === 1 ? 'acknowledgment' : 'acknowledgments'} for ${person.name}`}><strong>{person.missingTrainings}</strong><span>Pending</span></Link>
+                <Link to={`/training?staffId=${person.id}&work=filing`} aria-label={`Review ${person.awaitingFilingCount} awaiting filing for ${person.name}`}><strong>{person.awaitingFilingCount}</strong><span>Awaiting filing</span></Link>
+                <Link to={`/training?staffId=${person.id}&work=complete`} aria-label={`Review ${person.completedTrainings} completed records for ${person.name}`}><strong>{person.completedTrainings}</strong><span>Complete</span></Link>
               </div>
+              <Link className="person-record-link" to={`/training?staffId=${person.id}`}>{person.assignmentCount ? `Review ${person.assignmentCount} staff ${person.assignmentCount === 1 ? 'record' : 'records'}` : 'View assignments'} <span aria-hidden="true">→</span></Link>
             </div>
           )
         })}
@@ -208,5 +185,5 @@ export default function People() {
   )
 }
 
-const Req      = () => <span style={{ color: '#BC5148' }}>*</span>
+const Req      = () => <span style={{ color: 'var(--overdue)' }}>*</span>
 const PlusIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
