@@ -1,4 +1,5 @@
 {
+  "snapshotDate": "2025-12-29",
   "studies": [
     {
       "id": 1,
@@ -43,7 +44,10 @@
       "name": "Taylor Example",
       "email": "taylor.example@example.org",
       "role": "Sub-Investigator",
-      "studyIds": [1, 2],
+      "studyIds": [
+        1,
+        2
+      ],
       "missingTrainings": 2,
       "completedTrainings": 5
     },
@@ -52,7 +56,9 @@
       "name": "Jordan Sample",
       "email": "jordan.sample@example.org",
       "role": "Research Nurse",
-      "studyIds": [1],
+      "studyIds": [
+        1
+      ],
       "missingTrainings": 0,
       "completedTrainings": 8
     },
@@ -61,7 +67,10 @@
       "name": "Avery Demo",
       "email": "avery.demo@example.org",
       "role": "Regulatory Coordinator",
-      "studyIds": [1, 3],
+      "studyIds": [
+        1,
+        3
+      ],
       "missingTrainings": 1,
       "completedTrainings": 6
     },
@@ -70,7 +79,9 @@
       "name": "Dr. Riley Example",
       "email": "riley.example@example.org",
       "role": "Principal Investigator",
-      "studyIds": [1],
+      "studyIds": [
+        1
+      ],
       "missingTrainings": 0,
       "completedTrainings": 10
     },
@@ -79,7 +90,9 @@
       "name": "Dr. Morgan Sample",
       "email": "morgan.sample@example.org",
       "role": "Principal Investigator",
-      "studyIds": [2],
+      "studyIds": [
+        2
+      ],
       "missingTrainings": 1,
       "completedTrainings": 3
     },
@@ -88,7 +101,10 @@
       "name": "Robin Placeholder",
       "email": "robin.placeholder@example.org",
       "role": "Clinical Research Coordinator",
-      "studyIds": [2, 3],
+      "studyIds": [
+        2,
+        3
+      ],
       "missingTrainings": 0,
       "completedTrainings": 7
     }
@@ -102,10 +118,134 @@
       "sentDate": "Dec 1, 2025",
       "cadenceDays": 14,
       "staff": [
-        { "personId": 1, "name": "Taylor Example", "status": "reminded", "lastContacted": "Dec 15, 2025", "daysAgo": 14 },
-        { "personId": 2, "name": "Jordan Sample", "status": "complete", "lastContacted": "Dec 3, 2025", "daysAgo": null, "filedAt": "DEMO-ONC-001 > Training > Amendment 4" },
-        { "personId": 3, "name": "Avery Demo", "status": "reminded", "lastContacted": "Dec 15, 2025", "daysAgo": 14 },
-        { "personId": 4, "name": "Dr. Riley Example", "status": "complete", "lastContacted": "Dec 2, 2025", "daysAgo": null, "filedAt": "DEMO-ONC-001 > Training > Amendment 4" }
+        {
+          "personId": 1,
+          "name": "Taylor Example",
+          "status": "reminded",
+          "lastContacted": "Dec 15, 2025",
+          "daysAgo": 14,
+          "completionStatus": "pending",
+          "filingStatus": "pending"
+        },
+        {
+          "personId": 2,
+          "name": "Jordan Sample",
+          "status": "complete",
+          "lastContacted": "Dec 3, 2025",
+          "daysAgo": null,
+          "filedAt": "DEMO-ONC-001 > Training > Amendment 4",
+          "completionStatus": "complete",
+          "filingStatus": "filed",
+          "filingReference": "DEMO-ONC-001 > Training > Amendment 4",
+          "completedAt": "2025-12-03T15:00:00Z",
+          "filingRecordedAt": "2025-12-03T17:00:00Z"
+        },
+        {
+          "personId": 3,
+          "name": "Avery Demo",
+          "status": "reminded",
+          "lastContacted": "Dec 15, 2025",
+          "daysAgo": 14,
+          "completionStatus": "pending",
+          "filingStatus": "pending"
+        },
+        {
+          "personId": 4,
+          "name": "Dr. Riley Example",
+          "status": "complete",
+          "lastContacted": "Dec 2, 2025",
+          "daysAgo": null,
+          "filedAt": "DEMO-ONC-001 > Training > Amendment 4",
+          "completionStatus": "complete",
+          "filingStatus": "filed",
+          "filingReference": "DEMO-ONC-001 > Training > Amendment 4",
+          "completedAt": "2025-12-02T15:00:00Z",
+          "filingRecordedAt": "2025-12-02T17:00:00Z"
+        }
+      ],
+      "activity": [
+        {
+          "id": "demo-1-distribution",
+          "type": "distribution",
+          "title": "Training distributed",
+          "at": "2025-12-01T15:00:00Z",
+          "actor": "Alex Demo",
+          "version": "v4.0",
+          "detail": "Illustrative distribution event for this synthetic training.",
+          "source": "synthetic"
+        },
+        {
+          "id": "demo-1-1-followup",
+          "type": "follow-up",
+          "title": "Follow-up recorded",
+          "at": "2025-12-15T15:00:00Z",
+          "personId": 1,
+          "personName": "Taylor Example",
+          "actor": "Alex Demo",
+          "version": "v4.0",
+          "source": "synthetic",
+          "detail": "Illustrative follow-up from the sample dataset. StudyChaser did not send an email. "
+        },
+        {
+          "id": "demo-1-2-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-12-03T15:00:00Z",
+          "personId": 2,
+          "personName": "Jordan Sample",
+          "actor": "Jordan Sample",
+          "version": "v4.0",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        },
+        {
+          "id": "demo-1-2-filing",
+          "type": "filing",
+          "title": "Filing reference recorded",
+          "at": "2025-12-03T17:00:00Z",
+          "personId": 2,
+          "personName": "Jordan Sample",
+          "actor": "Alex Demo",
+          "version": "v4.0",
+          "source": "synthetic",
+          "detail": "DEMO-ONC-001 > Training > Amendment 4"
+        },
+        {
+          "id": "demo-1-3-followup",
+          "type": "follow-up",
+          "title": "Follow-up recorded",
+          "at": "2025-12-15T15:00:00Z",
+          "personId": 3,
+          "personName": "Avery Demo",
+          "actor": "Alex Demo",
+          "version": "v4.0",
+          "source": "synthetic",
+          "detail": "Illustrative follow-up from the sample dataset. StudyChaser did not send an email. "
+        },
+        {
+          "id": "demo-1-4-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-12-02T15:00:00Z",
+          "personId": 4,
+          "personName": "Dr. Riley Example",
+          "actor": "Dr. Riley Example",
+          "version": "v4.0",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        },
+        {
+          "id": "demo-1-4-filing",
+          "type": "filing",
+          "title": "Filing reference recorded",
+          "at": "2025-12-02T17:00:00Z",
+          "personId": 4,
+          "personName": "Dr. Riley Example",
+          "actor": "Alex Demo",
+          "version": "v4.0",
+          "source": "synthetic",
+          "detail": "DEMO-ONC-001 > Training > Amendment 4"
+        }
       ]
     },
     {
@@ -116,10 +256,106 @@
       "sentDate": "Nov 10, 2025",
       "cadenceDays": 7,
       "staff": [
-        { "personId": 1, "name": "Taylor Example", "status": "complete", "lastContacted": "Nov 12, 2025", "daysAgo": null },
-        { "personId": 2, "name": "Jordan Sample", "status": "complete", "lastContacted": "Nov 11, 2025", "daysAgo": null },
-        { "personId": 3, "name": "Avery Demo", "status": "complete", "lastContacted": "Nov 13, 2025", "daysAgo": null },
-        { "personId": 4, "name": "Dr. Riley Example", "status": "complete", "lastContacted": "Nov 11, 2025", "daysAgo": null }
+        {
+          "personId": 1,
+          "name": "Taylor Example",
+          "status": "complete",
+          "lastContacted": "Nov 12, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-11-12T15:00:00Z"
+        },
+        {
+          "personId": 2,
+          "name": "Jordan Sample",
+          "status": "complete",
+          "lastContacted": "Nov 11, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-11-11T15:00:00Z"
+        },
+        {
+          "personId": 3,
+          "name": "Avery Demo",
+          "status": "complete",
+          "lastContacted": "Nov 13, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-11-13T15:00:00Z"
+        },
+        {
+          "personId": 4,
+          "name": "Dr. Riley Example",
+          "status": "complete",
+          "lastContacted": "Nov 11, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-11-11T15:00:00Z"
+        }
+      ],
+      "activity": [
+        {
+          "id": "demo-2-distribution",
+          "type": "distribution",
+          "title": "Training distributed",
+          "at": "2025-11-10T15:00:00Z",
+          "actor": "Alex Demo",
+          "version": "v3.1",
+          "detail": "Illustrative distribution event for this synthetic training.",
+          "source": "synthetic"
+        },
+        {
+          "id": "demo-2-1-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-11-12T15:00:00Z",
+          "personId": 1,
+          "personName": "Taylor Example",
+          "actor": "Taylor Example",
+          "version": "v3.1",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        },
+        {
+          "id": "demo-2-2-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-11-11T15:00:00Z",
+          "personId": 2,
+          "personName": "Jordan Sample",
+          "actor": "Jordan Sample",
+          "version": "v3.1",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        },
+        {
+          "id": "demo-2-3-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-11-13T15:00:00Z",
+          "personId": 3,
+          "personName": "Avery Demo",
+          "actor": "Avery Demo",
+          "version": "v3.1",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        },
+        {
+          "id": "demo-2-4-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-11-11T15:00:00Z",
+          "personId": 4,
+          "personName": "Dr. Riley Example",
+          "actor": "Dr. Riley Example",
+          "version": "v3.1",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        }
       ]
     },
     {
@@ -130,8 +366,36 @@
       "sentDate": "Dec 10, 2025",
       "cadenceDays": 14,
       "staff": [
-        { "personId": 5, "name": "Dr. Morgan Sample", "status": "overdue", "lastContacted": "Dec 10, 2025", "daysAgo": 18 },
-        { "personId": 1, "name": "Taylor Example", "status": "sent", "lastContacted": "Dec 10, 2025", "daysAgo": 18 }
+        {
+          "personId": 5,
+          "name": "Dr. Morgan Sample",
+          "status": "overdue",
+          "lastContacted": "Dec 10, 2025",
+          "daysAgo": 18,
+          "completionStatus": "pending",
+          "filingStatus": "pending"
+        },
+        {
+          "personId": 1,
+          "name": "Taylor Example",
+          "status": "sent",
+          "lastContacted": "Dec 10, 2025",
+          "daysAgo": 18,
+          "completionStatus": "pending",
+          "filingStatus": "pending"
+        }
+      ],
+      "activity": [
+        {
+          "id": "demo-3-distribution",
+          "type": "distribution",
+          "title": "Training distributed",
+          "at": "2025-12-10T15:00:00Z",
+          "actor": "Alex Demo",
+          "version": "v2.0",
+          "detail": "Illustrative distribution event for this synthetic training.",
+          "source": "synthetic"
+        }
       ]
     },
     {
@@ -142,9 +406,71 @@
       "sentDate": "Dec 5, 2025",
       "cadenceDays": 21,
       "staff": [
-        { "personId": 1, "name": "Taylor Example", "status": "complete", "lastContacted": "Dec 7, 2025", "daysAgo": null },
-        { "personId": 2, "name": "Jordan Sample", "status": "sent", "lastContacted": "Dec 5, 2025", "daysAgo": 16 },
-        { "personId": 3, "name": "Avery Demo", "status": "complete", "lastContacted": "Dec 8, 2025", "daysAgo": null }
+        {
+          "personId": 1,
+          "name": "Taylor Example",
+          "status": "complete",
+          "lastContacted": "Dec 7, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-12-07T15:00:00Z"
+        },
+        {
+          "personId": 2,
+          "name": "Jordan Sample",
+          "status": "sent",
+          "lastContacted": "Dec 5, 2025",
+          "daysAgo": 16,
+          "completionStatus": "pending",
+          "filingStatus": "pending"
+        },
+        {
+          "personId": 3,
+          "name": "Avery Demo",
+          "status": "complete",
+          "lastContacted": "Dec 8, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-12-08T15:00:00Z"
+        }
+      ],
+      "activity": [
+        {
+          "id": "demo-4-distribution",
+          "type": "distribution",
+          "title": "Training distributed",
+          "at": "2025-12-05T15:00:00Z",
+          "actor": "Alex Demo",
+          "version": "2025",
+          "detail": "Illustrative distribution event for this synthetic training.",
+          "source": "synthetic"
+        },
+        {
+          "id": "demo-4-1-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-12-07T15:00:00Z",
+          "personId": 1,
+          "personName": "Taylor Example",
+          "actor": "Taylor Example",
+          "version": "2025",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        },
+        {
+          "id": "demo-4-3-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-12-08T15:00:00Z",
+          "personId": 3,
+          "personName": "Avery Demo",
+          "actor": "Avery Demo",
+          "version": "2025",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        }
       ]
     },
     {
@@ -155,8 +481,49 @@
       "sentDate": "Dec 12, 2025",
       "cadenceDays": 14,
       "staff": [
-        { "personId": 3, "name": "Avery Demo", "status": "sent", "lastContacted": "Dec 12, 2025", "daysAgo": 9 },
-        { "personId": 6, "name": "Robin Placeholder", "status": "complete", "lastContacted": "Dec 14, 2025", "daysAgo": null }
+        {
+          "personId": 3,
+          "name": "Avery Demo",
+          "status": "sent",
+          "lastContacted": "Dec 12, 2025",
+          "daysAgo": 9,
+          "completionStatus": "pending",
+          "filingStatus": "pending"
+        },
+        {
+          "personId": 6,
+          "name": "Robin Placeholder",
+          "status": "complete",
+          "lastContacted": "Dec 14, 2025",
+          "daysAgo": null,
+          "completionStatus": "complete",
+          "filingStatus": "pending",
+          "completedAt": "2025-12-14T15:00:00Z"
+        }
+      ],
+      "activity": [
+        {
+          "id": "demo-5-distribution",
+          "type": "distribution",
+          "title": "Training distributed",
+          "at": "2025-12-12T15:00:00Z",
+          "actor": "Jamie Example",
+          "version": "v2.0",
+          "detail": "Illustrative distribution event for this synthetic training.",
+          "source": "synthetic"
+        },
+        {
+          "id": "demo-5-6-completion",
+          "type": "completion",
+          "title": "Training completion recorded",
+          "at": "2025-12-14T15:00:00Z",
+          "personId": 6,
+          "personName": "Robin Placeholder",
+          "actor": "Robin Placeholder",
+          "version": "v2.0",
+          "source": "synthetic",
+          "detail": "Illustrative completion event. No electronic signature is stored in this demo."
+        }
       ]
     }
   ]

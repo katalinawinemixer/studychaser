@@ -7,11 +7,13 @@ import People from './pages/People'
 import EmailGenerator from './pages/EmailGenerator'
 import { IS_READ_ONLY_DEMO } from './lib/api'
 import { useLocation } from 'react-router-dom'
+import seedData from './data/mockData'
 
 function WorkspaceHeader() {
   const { pathname } = useLocation()
   const title = { '/dashboard': 'Overview', '/studies': 'Studies', '/training': 'Training tracker', '/people': 'People', '/email': 'Email preview' }[pathname] ?? 'Workspace'
-  return <header className="workspace-header"><div><span className="workspace-name">Study workspace</span><span className="breadcrumb-divider">/</span><span>{title}</span></div><span className="workspace-status"><span />Portfolio demo</span></header>
+  const snapshotDate = new Date(`${seedData.snapshotDate}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return <header className="workspace-header"><div className="workspace-breadcrumb"><span className="workspace-name">Workspace</span><span className="breadcrumb-divider" aria-hidden="true">/</span><span>{title}</span></div>{IS_READ_ONLY_DEMO && <details className="demo-context"><summary>Demo · {snapshotDate}</summary><p>Synthetic snapshot as of {snapshotDate}. Records are read-only, filing references are illustrative, and email previews never send messages. Contact ages use the snapshot date.</p></details>}</header>
 }
 
 export default function App() {
@@ -23,13 +25,6 @@ export default function App() {
         <main className="main-content" id="main-content">
           <WorkspaceHeader />
           <div className="page-content">
-          {IS_READ_ONLY_DEMO && (
-            <div className="demo-banner">
-              <span className="demo-mark" aria-hidden="true">i</span>
-              <strong>A little look inside StudyChaser.</strong>
-              <span>Explore with synthetic data. Read-only demo; emails are preview only.</span>
-            </div>
-          )}
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -38,7 +33,7 @@ export default function App() {
             <Route path="/people" element={<People />} />
             <Route path="/email" element={<EmailGenerator />} />
           </Routes>
-          <footer className="workspace-footer">StudyChaser <span>Built for the details that keep research moving.</span></footer>
+          <footer className="workspace-footer">StudyChaser <span>Training completion and evidence filing, tracked separately.</span></footer>
           </div>
         </main>
       </div>

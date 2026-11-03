@@ -21,17 +21,24 @@ StudyChaser turns that workflow into a small product surface: study-level status
 ```text
 frontend/   React and Vite web app, route views, API client, and production redirects
 backend/    Node.js API, data store, tests, and Cloudflare Worker deployment config
+shared/     Assignment counts, email eligibility, completion, and filing rules
 ```
 
 ## What It Does
 
+This feature list describes the repository version; the live demo may differ while changes are under local review.
+
 ![StudyChaser dashboard showing synthetic overdue, awaiting, completed, and active-study training counts](docs/assets/screenshots/dashboard.png)
 
-- Shows a dashboard of overdue, awaiting, completed, and active-study training counts.
+- Shows follow-ups due and evidence awaiting filing as separate work queues, with direct links to the matching records.
+- Derives dashboard, study, and people counts from the same staff assignments. A staff record represents one person assigned to one training item; filing is a separate state on that record.
 - Lists synthetic active studies with PI, coordinator, sponsor, and IRB details.
-- Tracks each training item by staff member, status, last contact date, and filing note.
-- Shows staff-level outstanding and completed training counts.
-- Generates preview-only synthetic follow-up emails from backend templates.
+- Tracks training completion separately from evidence filing, with completed records still visible while filing is outstanding.
+- Opens a training detail panel with version, coordinator, staff records, and activity history filtered by staff member.
+- Records local completion and filing changes as separate dated events. Filing requires a completion record and a document location/reference.
+- Labels authored sample history as synthetic and keeps email-preview activity separately in browser-session storage. Previews never send email or change the training record.
+- Opens person-specific training records from People, with study, staff, and work-status filters in the tracker. Training groups start collapsed and have expand/collapse controls.
+- Generates preview-only follow-up emails with assignment and completion checks. Completed assignments allow confirmation only. PI escalation addresses the recorded PI rather than the person owing training; an overdue PI receives a direct reminder.
 
 ## Run Locally
 
@@ -87,13 +94,16 @@ Local development also includes write routes for experimenting with the workflow
 - The frontend is a Vite/React app with route views for dashboard, studies, staff, training records, and email preview workflows.
 - The backend exposes a small Node.js API that can run locally as an HTTP server or deploy as a Cloudflare Worker.
 - Production/demo mode uses synthetic data and read-only protections so hiring reviewers can explore the workflow without creating or changing records.
+- The read-only Worker serves its bundled synthetic dataset so published example histories stay in sync with the code. Writable local/Worker mode retains its existing file/KV store.
+- Frontend fallback data and templates use the same synthetic seed and domain rules as the API. Legacy completion flags do not imply filing, and legacy filing locations do not imply a recorded event date.
+- The bundled dataset has an explicit December 29, 2025 snapshot date. Contact ages are calculated from recorded contact dates relative to that snapshot, rather than combined with a live date. Locally stored datasets without a snapshot date use the current date.
 - The data model is intentionally domain-specific: studies, people, training records, staff status, PI/coordinator ownership, IRB details, last-contact dates, and filing notes.
 - Email generation is preview-only in the demo: it produces coordinator-ready follow-up language without sending real messages.
 
 ## What I Would Build Next
 
 - Authentication and role-based permissions for coordinators, PIs, regulatory staff, and read-only reviewers.
-- An audit trail for training status changes, follow-up attempts, and filing notes.
+- A production audit trail with authenticated actors, controlled record changes, retention, and validation. The current activity history is a portfolio demonstration.
 - Notifications for overdue training and amendment acknowledgments.
 - CSV/PDF export for monitoring visits, sponsor requests, and internal QA review.
 - Integrations with CTMS/eTMF or document-management systems so training evidence and filing notes can connect to the rest of the clinical operations stack.

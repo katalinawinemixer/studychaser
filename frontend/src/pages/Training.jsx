@@ -3,22 +3,49 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { IS_READ_ONLY_DEMO, apiGet, apiPost, useApiData } from '../lib/api'
 import Modal from '../components/Modal'
 import TrainingStaffList from '../components/TrainingStaffList'
+import TrainingDetails from '../components/TrainingDetails'
+import { completionStatus, matchesWork, trainingCounts } from '../../../shared/trainingRecords'
+import { recommendedEmailType } from '../../../shared/emailRules'
 
 const EMPTY_FORM = { studyId: '', title: '', version: '', sentDate: '', cadenceDays: 14 }
 
 export default function Training() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const selectedTrainingId = searchParams.get('trainingId')
+  const selectedPersonId = searchParams.get('personId')
   const selectedStudyId = searchParams.get('studyId') || 'all'
+  const staffId = searchParams.get('staffId') || 'all'
+  const work = searchParams.get('work') || 'all'
   const [expandedGroups, setExpandedGroups] = useState({})
   const { data, loading, error, refetch } = useApiData(
     async () => {
-      const [trainings, studies] = await Promise.all([apiGet('/trainings'), apiGet('/studies')])
-      return { trainings, studies }
+      const [trainings, studies, people] = await Promise.all([apiGet('/trainings'), apiGet('/studies'), apiGet('/people')])
+      return { trainings, studies, people }
     },
-    { trainings: [], studies: [] }
+    { trainings: [], studies: [], people: [] }
   )
-  const { trainings, studies } = data
+  const { trainings, studies, people } = data
+  const selectedTraining = trainings.find(training => training.id === Number(selectedTrainingId))
+
+  function openDetails(training, personId, section) {
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      next.set('trainingId', training.id)
+      if (personId) next.set('personId', personId)
+      else next.delete('personId')
+      if (section) next.set('detailSection', section)
+      else next.delete('detailSection')
+      return next
+    })
+  }
+  function closeDetails() {
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      for (const key of ['trainingId', 'personId', 'detailSection']) next.delete(key)
+      return next
+    }, { replace: true })
+  }
 
   const [addOpen, setAddOpen] = useState(() => !IS_READ_ONLY_DEMO && searchParams.get('new') === '1')
   const [form, setForm] = useState(EMPTY_FORM)
@@ -50,32 +77,33 @@ export default function Training() {
   }
 
   function handleAction(training, member) {
-    const type = member.status === 'overdue' ? 'pi' : 'second'
+    const type = recommendedEmailType({ study: studies.find(study => study.id === training.studyId), member, people })
     navigate(`/email?studyId=${training.studyId}&trainingId=${training.id}&personId=${member.personId}&type=${type}`)
   }
 
-  const filtered = selectedStudyId === 'all'
-    ? trainings
-    : trainings.filter(t => t.studyId === Number(selectedStudyId))
+  const filtered = trainings.filter(training => selectedStudyId === 'all' || training.studyId === Number(selectedStudyId))
+    .map(training => ({ ...training, staff: training.staff.filter(member => (staffId === 'all' || member.personId === Number(staffId)) && matchesWork(member, work, training.cadenceDays)) }))
+    .filter(training => (work === 'all' && staffId === 'all') || training.staff.length > 0)
+  const visibleRecords = filtered.reduce((sum, training) => sum + training.staff.length, 0)
 
-  function selectStudy(value) {
+  function setFilter(key, value) {
+    setExpandedGroups({})
     setSearchParams(previous => {
       const next = new URLSearchParams(previous)
-      if (value === 'all') next.delete('studyId')
-      else next.set('studyId', value)
+      for (const field of ['trainingId', 'personId', 'detailSection']) next.delete(field)
+      if (value === 'all') next.delete(key)
+      else next.set(key, value)
       return next
     })
   }
-
-  const countByStatus = (staff, status) => staff.filter(s => s.status === status).length
 
   return (
     <div>
       <div className="page-header">
         <div className="page-header-row">
           <div>
-            <h1 className="page-title">Training Tracker</h1>
-            <p className="page-subtitle">Track acknowledgment status for each study training item.</p>
+            <h1 className="page-title">Training tracker</h1>
+            <p className="page-subtitle">Track training completion and evidence filing for each study.</p>
           </div>
           {!IS_READ_ONLY_DEMO && (
             <button className="btn btn-primary" onClick={openModal}>
@@ -88,38 +116,41 @@ export default function Training() {
       {error && <div className="api-message api-error">{error}</div>}
       {loading && <div className="api-message" role="status">Loading trainings...</div>}
 
-      <div className="training-filter">
-        <label htmlFor="study-filter">Filter by study:</label>
+      <div className="training-filters" aria-label="Training filters">
+        <div className="form-group"><label htmlFor="study-filter">Study</label>
         <select
           id="study-filter"
           value={selectedStudyId}
-          onChange={e => selectStudy(e.target.value)}
+          onChange={e => setFilter('studyId', e.target.value)}
           disabled={loading}
         >
-          <option value="all">All Studies</option>
+          <option value="all">All studies</option>
           {studies.map(s => (
             <option key={s.id} value={s.id}>{s.studyNumber} — {s.title}</option>
           ))}
-        </select>
+        </select></div>
+        <div className="form-group"><label htmlFor="staff-filter">Staff member</label><select id="staff-filter" value={staffId} onChange={e => setFilter('staffId', e.target.value)} disabled={loading}><option value="all">All staff</option>{people.map(person => <option value={person.id} key={person.id}>{person.name}</option>)}</select></div>
+        <div className="form-group"><label htmlFor="work-filter">Work status</label><select id="work-filter" value={work} onChange={e => setFilter('work', e.target.value)} disabled={loading}><option value="all">All records</option><option value="follow-up">Follow-up due</option><option value="pending">Pending acknowledgment</option><option value="filing">Awaiting filing</option><option value="filed">Evidence filed</option><option value="complete">Training complete</option></select></div>
       </div>
+
+      {!loading && <div className="tracker-toolbar"><p>{filtered.length} training {filtered.length === 1 ? 'item' : 'items'} · {visibleRecords} staff {visibleRecords === 1 ? 'record' : 'records'}</p><div className="toolbar-actions"><button className="text-button" onClick={() => setExpandedGroups(Object.fromEntries(filtered.map(training => [training.id, true])))}>Expand all</button><button className="text-button" onClick={() => setExpandedGroups(Object.fromEntries(filtered.map(training => [training.id, false])))}>Collapse all</button>{(work !== 'all' || staffId !== 'all' || selectedStudyId !== 'all') && <button className="text-button" onClick={() => { setSearchParams({}); setExpandedGroups({}) }}>Clear filters</button>}</div></div>}
 
       {!loading && !error && filtered.length === 0 && (
         <div className="card card-pad">
           <div className="empty-state">
             <h3>No trainings found</h3>
-            <p>{selectedStudyId !== 'all' ? 'This study has no training items to display.' : 'No training items are available yet.'}</p>
-            {selectedStudyId !== 'all' && <button className="btn btn-secondary" onClick={() => selectStudy('all')}>View all studies</button>}
+            <p>No staff records match these filters.</p>
+            <button className="btn btn-secondary" onClick={() => { setSearchParams({}); setExpandedGroups({}) }}>Clear filters</button>
           </div>
         </div>
       )}
 
       {filtered.map(training => {
         const study   = studies.find(s => s.id === training.studyId)
-        const done    = countByStatus(training.staff, 'complete')
+        const counts = trainingCounts(training)
+        const done = counts.completed
         const total   = training.staff.length
-        const hasUrgent = training.staff.some(member => member.status === 'overdue' ||
-          (['sent', 'reminded'].includes(member.status) && member.daysAgo >= training.cadenceDays))
-        const isOpen = expandedGroups[training.id] ?? hasUrgent
+        const isOpen = expandedGroups[training.id] ?? (work !== 'all' || staffId !== 'all')
 
         return (
           <div className="training-block" key={training.id}>
@@ -131,14 +162,9 @@ export default function Training() {
                 <span className="training-heading-title">
                   <span className="training-block-title">{training.title}</span>
                   <span className="tag">{study?.studyNumber ?? 'Unknown study'}</span>
-                  {hasUrgent && (
-                    <span style={{ fontSize: '11px', color: '#95651D', fontWeight: 600 }}>
-                      Needs attention
-                    </span>
-                  )}
                 </span>
                 <span className="training-block-meta">
-                  {training.version} · Sent {training.sentDate} · Follow-up every {training.cadenceDays} days
+                  {training.version} · {total} {staffId !== 'all' || work !== 'all' ? 'matching ' : ''}staff {total === 1 ? 'record' : 'records'} · Follow-up every {training.cadenceDays} days
                 </span>
               </span>
 
@@ -148,16 +174,11 @@ export default function Training() {
                     <span className="badge-dot" />
                     {done}/{total} complete
                   </span>
-                  {countByStatus(training.staff, 'overdue') > 0 && (
-                    <span className="badge overdue" style={{ fontSize: '11px' }}>
-                      <span className="badge-dot" style={{ background: '#BC5148' }} />
-                      {countByStatus(training.staff, 'overdue')} overdue
-                    </span>
-                  )}
-                  {countByStatus(training.staff, 'reminded') > 0 && (
-                    <span className="badge reminded" style={{ fontSize: '11px' }}>
-                      <span className="badge-dot" style={{ background: '#95651D' }} />
-                      {countByStatus(training.staff, 'reminded')} reminded
+                  {counts.awaitingFiling > 0 && <span className="badge filing-awaiting-filing">{counts.awaitingFiling} awaiting filing</span>}
+                  {training.staff.filter(member => completionStatus(member) !== 'complete' && member.status === 'overdue').length > 0 && (
+                    <span className="badge overdue">
+                      <span className="badge-dot" />
+                      {training.staff.filter(member => completionStatus(member) !== 'complete' && member.status === 'overdue').length} overdue
                     </span>
                   )}
                 </span>
@@ -166,12 +187,14 @@ export default function Training() {
             </button>
 
             <div id={`training-panel-${training.id}`} hidden={!isOpen}>
-              {isOpen && <TrainingStaffList training={training} onAction={handleAction} />}
+              {isOpen && <><div className="training-detail-entry"><button className="record-history-link" aria-label={`View details for ${training.title}`} onClick={() => openDetails(training)}>Training details &amp; history →</button></div><TrainingStaffList key={`${training.id}-${staffId}-${work}`} training={training} showAll={['filed', 'complete'].includes(work) || staffId !== 'all'} onAction={handleAction} onDetails={(personId, section) => openDetails(training, personId, section)} /></>}
             </div>
           </div>
         )
       })}
 
+      {!loading && !error && selectedTrainingId && !selectedTraining && <div className="api-message" role="alert">This training record could not be found. <button className="record-history-link" onClick={closeDetails}>Return to the tracker</button></div>}
+      {selectedTraining && <TrainingDetails key={`${selectedTraining.id}-${selectedPersonId ?? ''}-${searchParams.get('detailSection') ?? ''}`} training={selectedTraining} study={studies.find(study => study.id === selectedTraining.studyId)} personId={selectedPersonId} initialSection={searchParams.get('detailSection')} onClose={closeDetails} onSaved={refetch} />}
       {!IS_READ_ONLY_DEMO && addOpen && (
         <Modal title="Add Training" onClose={closeModal}>
           <form onSubmit={handleSubmit} className="form-stack">
@@ -243,7 +266,7 @@ export default function Training() {
   )
 }
 
-const Req      = () => <span style={{ color: '#BC5148' }}>*</span>
+const Req      = () => <span style={{ color: 'var(--overdue)' }}>*</span>
 const PlusIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 
 function ChevronIcon({ open }) {

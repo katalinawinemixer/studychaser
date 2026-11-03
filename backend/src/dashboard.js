@@ -1,13 +1,17 @@
-export function buildDashboard({ studies, trainings }) {
+import { completionStatus, filingStatus, needsFollowUp } from '../../shared/trainingRecords.js'
+import { workspaceView } from '../../shared/workspace.js'
+import { recommendedEmailType } from '../../shared/emailRules.js'
+
+export function buildDashboard(input) {
+  const { studies, trainings, people, snapshotDate } = workspaceView(input)
   const attentionItems = []
+  const filingItems = []
 
   for (const training of trainings) {
     const study = studies.find((candidate) => candidate.id === training.studyId)
 
     for (const member of training.staff) {
-      const needsReminder =
-        member.status === 'overdue' ||
-        ((member.status === 'reminded' || member.status === 'sent') && member.daysAgo >= training.cadenceDays)
+      const needsReminder = needsFollowUp(member, training.cadenceDays)
 
       if (needsReminder) {
         attentionItems.push({
@@ -19,9 +23,13 @@ export function buildDashboard({ studies, trainings }) {
           studyId: study?.id,
           status: member.status,
           daysAgo: member.daysAgo,
-          nextAction: member.status === 'overdue' ? 'Escalate to PI' : 'Send reminder',
+          emailType: recommendedEmailType({ study, member, people }),
         })
       }
+      if (filingStatus(member) === 'awaiting-filing') filingItems.push({
+        person: member.name, personId: member.personId, training: training.title,
+        trainingId: training.id, study: study?.studyNumber ?? 'Unknown study', studyId: study?.id,
+      })
     }
   }
 
@@ -33,19 +41,29 @@ export function buildDashboard({ studies, trainings }) {
   const allStaff = trainings.flatMap((training) => training.staff)
 
   return {
+    snapshotDate,
     stats: {
-      overdueCount: allStaff.filter((member) => member.status === 'overdue').length,
-      awaitingCount: allStaff.filter((member) => ['sent', 'reminded'].includes(member.status)).length,
-      completedCount: allStaff.filter((member) => member.status === 'complete').length,
+      overdueCount: allStaff.filter((member) => completionStatus(member) !== 'complete' && member.status === 'overdue').length,
+      awaitingCount: allStaff.filter((member) => completionStatus(member) !== 'complete' && ['sent', 'reminded'].includes(member.status)).length,
+      completedCount: allStaff.filter((member) => completionStatus(member) === 'complete').length,
+      assignmentCount: allStaff.length,
+      pendingCount: allStaff.filter((member) => completionStatus(member) !== 'complete').length,
+      filedCount: allStaff.filter((member) => filingStatus(member) === 'filed').length,
+      awaitingFilingCount: allStaff.filter((member) => filingStatus(member) === 'awaiting-filing').length,
       activeStudies: studies.filter((study) => study.status === 'active').length,
     },
     attentionItems,
+    filingItems,
     studySummary: studies.map((study) => ({
       id: study.id,
       studyNumber: study.studyNumber,
       title: study.title,
       activeTrainings: study.activeTrainings,
       completedTrainings: study.completedTrainings,
+      missingTrainings: study.missingTrainings,
+      trainingCount: study.trainingCount,
+      assignmentCount: study.assignmentCount,
+      awaitingFilingCount: study.awaitingFilingCount,
       coordinator: study.coordinator,
     })),
   }

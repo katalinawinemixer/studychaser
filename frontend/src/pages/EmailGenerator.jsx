@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { recordPreviewActivity } from '../lib/previewActivity'
 import { apiGet, apiPost, useApiData } from '../lib/api'
-
-const EMAIL_TYPES = [
-  { value: 'first',    label: 'First Reminder' },
-  { value: 'second',   label: 'Second Reminder' },
-  { value: 'overdue',  label: 'Overdue / Escalation' },
-  { value: 'confirm',  label: 'Completion Confirmation' },
-  { value: 'pi',       label: 'PI Escalation' },
-]
+import { EMAIL_TYPES, allowedEmailTypes, recommendedEmailType, isStudyPi } from '../../../shared/emailRules'
+import { completionStatus } from '../../../shared/trainingRecords'
 
 export default function EmailGenerator() {
   const [searchParams] = useSearchParams()
@@ -40,6 +35,16 @@ export default function EmailGenerator() {
   const study    = studies.find(s => s.id === Number(studyId))
   const training = trainings.find(t => t.id === Number(trainingId))
   const person   = people.find(p => p.id === Number(personId))
+  const member = training?.staff.find(candidate => candidate.personId === Number(personId))
+  const allowed = allowedEmailTypes({ study, member, people })
+  const selectionKey = `${studyId}/${trainingId}/${personId}/${emailType}`
+  const currentEmail = email?.selectionKey === selectionKey ? email : null
+
+  useEffect(() => {
+    if (!loading && member && !allowed.includes(emailType)) {
+      setEmailType(recommendedEmailType({ study, member, people }))
+    }
+  }, [loading, studyId, trainingId, personId, emailType])
 
   const studyTrainings = studyId
     ? trainings.filter(t => t.studyId === Number(studyId))
@@ -54,7 +59,7 @@ export default function EmailGenerator() {
     setCopied(false)
     setCopyError('')
     setEmail(null)
-    if (!studyId || !trainingId || !personId) {
+    if (!studyId || !trainingId || !personId || loading || !allowed.includes(emailType)) {
       setEmail(null)
       setEmailError('')
       setEmailLoading(false)
@@ -73,7 +78,10 @@ export default function EmailGenerator() {
       senderName: 'Alex Demo',
     })
       .then(result => {
-        if (active) setEmail(result)
+        if (active) {
+          setEmail({ ...result, selectionKey })
+          recordPreviewActivity({ training: { id: Number(trainingId), version: result.version || training?.version }, person: { id: Number(personId), name: person?.name || 'Selected staff member' }, emailType })
+        }
       })
       .catch(err => {
         if (active) {
@@ -89,11 +97,11 @@ export default function EmailGenerator() {
       active = false
       clearTimeout(copiedTimer.current)
     }
-  }, [studyId, trainingId, personId, emailType, previewAttempt])
+  }, [studyId, trainingId, personId, emailType, previewAttempt, loading])
 
   const handleCopy = async () => {
-    if (!email || emailLoading) return
-    const text = `Subject: ${email.subject}\n\n${email.body}`
+    if (!currentEmail || emailLoading) return
+    const text = `Subject: ${currentEmail.subject}\n\n${currentEmail.body}`
     setCopyError('')
     try {
       await navigator.clipboard.writeText(text)
@@ -119,6 +127,7 @@ export default function EmailGenerator() {
       {loading && <div className="api-message" role="status">Loading email options...</div>}
       {emailError && <div className="api-message api-error" role="alert">{emailError}</div>}
 
+      {currentEmail && <Link className="preview-history-return" to={`/training?trainingId=${trainingId}&personId=${personId}&detailSection=history`}>View activity history →</Link>}
       <div className="email-layout">
         {/* Form panel */}
         <div className="card card-pad">
@@ -157,11 +166,16 @@ export default function EmailGenerator() {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="email-recipient">Recipient</label>
+              <label className="form-label" htmlFor="email-recipient">Staff member</label>
               <select id="email-recipient"
                 className="form-select"
                 value={personId}
-                onChange={e => setPersonId(e.target.value)}
+                onChange={e => {
+                  const nextMember = trainingPeople.find(candidate => candidate.personId === Number(e.target.value))
+                  setPersonId(e.target.value)
+                  setEmailType(recommendedEmailType({ study, member: nextMember, people }))
+                  setEmail(null)
+                }}
                 disabled={!trainingId || loading}
               >
                 <option value="">Select a person…</option>
@@ -169,7 +183,7 @@ export default function EmailGenerator() {
                   const p = people.find(x => x.id === m.personId)
                   return p ? (
                     <option key={p.id} value={p.id}>
-                      {p.name} — {m.status}
+                      {p.name} — {completionStatus(m) === 'complete' ? 'complete' : m.status}
                     </option>
                   ) : null
                 })}
@@ -182,14 +196,18 @@ export default function EmailGenerator() {
                 className="form-select"
                 value={emailType}
                 onChange={e => setEmailType(e.target.value)}
-                disabled={loading}
+                disabled={loading || !member}
               >
                 {EMAIL_TYPES.map(t => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value} disabled={!allowed.includes(t.value)}>{t.label}</option>
                 ))}
               </select>
             </div>
-
+            {member && <p className="record-help" role="status">{completionStatus(member) === 'complete'
+              ? 'Completion is recorded. Only a completion confirmation is available.'
+              : isStudyPi(study, member)
+                ? 'This staff member is the PI. Follow up directly; self-escalation is unavailable.'
+                : 'Reminders go to the staff member. PI escalation goes to the study PI and is available for overdue assignments with a PI email on record.'}</p>}
           </div>
         </div>
 
@@ -197,7 +215,7 @@ export default function EmailGenerator() {
         <section className="email-preview" aria-labelledby="email-preview-title" aria-busy={emailLoading}>
           <div className="email-preview-header">
             <h2 id="email-preview-title">Email preview</h2>
-            <button className="btn btn-primary" onClick={handleCopy} disabled={!email || emailLoading}>
+            <button className="btn btn-primary" onClick={handleCopy} disabled={!currentEmail || emailLoading}>
               <CopyIcon /> {copied ? 'Copied' : 'Copy email'}
             </button>
           </div>
@@ -205,12 +223,12 @@ export default function EmailGenerator() {
           {copyError && <div className="api-message api-error" role="alert">{copyError}</div>}
 
           {emailLoading ? (
-            <div className="empty-state" role="status" style={{ padding: '80px 20px' }}>
+            <div className="empty-state" role="status">
               <MailIcon />
               <h3 style={{ marginTop: '14px' }}>Preparing email preview...</h3>
               <p>Your selected follow-up template will appear here.</p>
             </div>
-          ) : email ? (
+          ) : currentEmail ? (
             <>
               <div className="email-meta">
                 <div className="email-meta-row">
@@ -219,14 +237,15 @@ export default function EmailGenerator() {
                 </div>
                 <div className="email-meta-row">
                   <span className="meta-label">To:</span>
-                  <span className="meta-val">{person?.name} &lt;{person?.email}&gt;</span>
+                  <span className="meta-val">{currentEmail.to}</span>
                 </div>
+                {emailType === 'pi' && <div className="email-meta-row"><span className="meta-label">Training owed by:</span><span className="meta-val">{currentEmail.staffMember?.name}</span></div>}
                 <div className="email-meta-row">
                   <span className="meta-label">Subject:</span>
-                  <span className="meta-val" style={{ fontWeight: 500 }}>{email.subject}</span>
+                  <span className="meta-val" style={{ fontWeight: 500 }}>{currentEmail.subject}</span>
                 </div>
               </div>
-              <div className="email-body">{email.body}</div>
+              <div className="email-body">{currentEmail.body}</div>
             </>
           ) : emailError ? (
             <div className="empty-state">
@@ -235,7 +254,7 @@ export default function EmailGenerator() {
               <button className="btn btn-secondary" onClick={() => setPreviewAttempt(value => value + 1)}>Try again</button>
             </div>
           ) : (
-            <div className="empty-state" style={{ padding: '80px 20px' }}>
+            <div className="empty-state">
               <MailIcon />
               <h3 style={{ marginTop: '14px' }}>Choose an email to preview</h3>
               <p>Select a study, training, and recipient to preview a follow-up email.</p>
@@ -250,7 +269,7 @@ export default function EmailGenerator() {
 const CopyIcon = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
 
 const MailIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#536451" strokeWidth="1.5" strokeLinecap="round">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
     <polyline points="22,6 12,13 2,6"/>
   </svg>

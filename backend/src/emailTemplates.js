@@ -1,16 +1,31 @@
-const EMAIL_TYPES = new Set(['first', 'second', 'overdue', 'confirm', 'pi'])
+import { allowedEmailTypes, escalationRecipient, isStudyPi, EMAIL_TYPES } from '../../shared/emailRules.js'
 
-export function generateEmail({ study, training, person, type = 'first', senderName = 'Alex Demo' }) {
+export function generateEmail({ study, training, person, people = [], type = 'first', senderName = 'Alex Demo' }) {
   if (!study || !training || !person) {
     throw Object.assign(new Error('study, training, and person are required'), { statusCode: 400 })
   }
 
-  if (!EMAIL_TYPES.has(type)) {
+  if (!EMAIL_TYPES.some(option => option.value === type)) {
     throw Object.assign(new Error(`Unsupported email type: ${type}`), { statusCode: 400 })
   }
 
-  const firstName = person.name.split(' ')[0]
-  const piLastName = study.pi.split(' ').at(-1)
+  const member = training.staff?.find(candidate => candidate.personId === person.id)
+  if (training.studyId !== study.id || !member) {
+    throw Object.assign(new Error('Choose a staff member assigned to this training and study.'), { statusCode: 400 })
+  }
+  if (!allowedEmailTypes({ study, member, people }).includes(type)) {
+    const message = type === 'pi'
+      ? (isStudyPi(study, member) ? 'This staff member is the PI. Use a direct reminder instead of self-escalation.' : 'PI escalation needs an overdue assignment and a recorded PI email address.')
+      : type === 'confirm' ? 'Record completion before preparing a completion confirmation.'
+        : member.completionStatus === 'complete' || member.status === 'complete'
+          ? 'Training is already complete. Use a completion confirmation instead of a reminder.'
+          : 'An overdue reminder requires an overdue assignment.'
+    throw Object.assign(new Error(message), { statusCode: 409 })
+  }
+  const recipient = type === 'pi' ? escalationRecipient(study, people) : person
+
+  const firstName = /^Dr\.?\s/i.test(person.name) ? `Dr. ${person.name.split(' ').at(-1)}` : person.name.split(' ')[0]
+  const piLastName = recipient.name.split(' ').at(-1)
   const sig = `Best regards,\n${senderName}\nRegulatory Coordinator`
 
   const subjects = {
@@ -58,8 +73,7 @@ ${sig}`,
 
 Thank you - we have received your acknowledgment for the ${training.title} (${training.version}) for Study ${study.studyNumber}.
 
-This preview assumes the training record has been updated and documentation would be filed under:
-${study.studyNumber} > Training > ${training.title}
+This preview confirms training completion only. Filing of the completion evidence is tracked separately in StudyChaser.
 
 No further action is needed on your end. Thank you for your prompt response.
 
@@ -77,7 +91,10 @@ ${sig}`,
   }
 
   return {
-    to: `${person.name} <${person.email}>`,
+    to: `${recipient.name} <${recipient.email}>`,
+    recipient: { id: recipient.id, name: recipient.name, email: recipient.email },
+    staffMember: { id: person.id, name: person.name },
+    version: training.version,
     subject: subjects[type],
     body: bodies[type],
   }

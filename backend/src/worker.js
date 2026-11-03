@@ -1,9 +1,11 @@
+import { updateTrainingMember } from '../../shared/trainingRecords.js'
+import { workspaceView } from '../../shared/workspace.js'
 import { parseJsonObject } from './requestBody.js'
 import seedData from '../data/db.json'
 import { buildDashboard } from './dashboard.js'
 import { isBlockedDemoWrite, isReadOnlyDemo } from './demoMode.js'
 import { generateEmail } from './emailTemplates.js'
-import { nextId, pick, sanitizePerson, sanitizeStudy, sanitizeTraining } from './model.js'
+import { nextId, sanitizePerson, sanitizeStudy, sanitizeTraining } from './model.js'
 
 const DATA_KEY = 'studychaser:demo:v2'
 const LOCAL_DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/
@@ -43,7 +45,8 @@ async function route(request, env) {
   }
 
   const store = createWorkerStore(env)
-  const data = await store.read()
+  const storedData = await store.read()
+  const data = request.method === 'GET' || segments[1] === 'email' ? workspaceView(storedData) : storedData
 
   if (request.method === 'GET' && segments[1] === 'dashboard' && segments[2] === 'summary') {
     return json(request, env, 200, buildDashboard(data))
@@ -59,7 +62,7 @@ async function route(request, env) {
       return json(request, env, 404, { error: 'Study, training, or person not found' })
     }
 
-    return json(request, env, 200, generateEmail({ ...payload, study, training, person }))
+    return json(request, env, 200, generateEmail({ ...payload, study, training, person, people: data.people }))
   }
 
   if (segments[1] === 'studies') {
@@ -167,10 +170,7 @@ async function handleStaffUpdate({ request, env, store, data, trainingId, person
   if (index === -1) return json(request, env, 404, { error: 'Training staff member not found' })
 
   const payload = await readJson(request)
-  training.staff[index] = {
-    ...training.staff[index],
-    ...pick(payload, ['status', 'lastContacted', 'daysAgo', 'filedAt']),
-  }
+  updateTrainingMember(training, index, payload)
 
   await store.write(data)
   return json(request, env, 200, training.staff[index])
@@ -183,6 +183,9 @@ function createWorkerStore(env) {
 
   return {
     async read() {
+      // The public demo is a published synthetic snapshot. Keep fixture updates
+      // visible without overwriting any records in the writable local/KV store.
+      if (isReadOnlyDemo(env)) return structuredClone(seedData)
       const data = await env.STUDYCHASER_KV.get(DATA_KEY, 'json')
       if (data) return data
 

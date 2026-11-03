@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 
 const DashIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -57,8 +58,12 @@ const navLinks = [
 ]
 
 export default function Sidebar() {
+  const [navOpen, setNavOpen] = useState(false)
+  const toggleRef = useRef(null)
+  const { pathname } = useLocation()
+  useEffect(() => setNavOpen(false), [pathname])
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" onKeyDown={event => { if (event.key === 'Escape' && navOpen) { setNavOpen(false); toggleRef.current?.focus() } }}>
       <div className="sidebar-logo">
         <div className="sidebar-logo-mark">
           <div className="logo-icon"><LogoIcon /></div>
@@ -67,15 +72,17 @@ export default function Sidebar() {
             <p>Research, kept on track</p>
           </div>
         </div>
+        <button ref={toggleRef} type="button" className="mobile-nav-toggle btn btn-secondary" aria-expanded={navOpen} aria-controls="main-navigation" onClick={() => setNavOpen(open => !open)}>{navOpen ? 'Close menu' : 'Menu'}</button>
       </div>
 
-      <nav className="sidebar-nav" aria-label="Main navigation">
+      <nav id="main-navigation" className={`sidebar-nav${navOpen ? ' is-open' : ''}`} aria-label="Main navigation">
         <div className="nav-label">Workspace</div>
         {navLinks.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+            onClick={() => setNavOpen(false)}
           >
             <Icon />
             {label}
@@ -83,7 +90,6 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="sidebar-note"><span className="sidebar-note-label">A little less chasing.</span><p>A clearer view of your study training, all in one place.</p><NavLink to="/training">View training tracker <span aria-hidden="true">↗</span></NavLink></div>
       <div className="sidebar-footer">
         <div className="sidebar-user">
           <div className="user-avatar">AD</div>
